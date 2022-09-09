@@ -18,9 +18,9 @@ import requests
 
 sys.path.append('../')
 
-from lib.environment.networking.worker_config import WorkerConfig
-from lib.environment.parallel_jass_environment import ParallelJassEnvironment
-from lib.factory import get_network, get_features
+from jass_mu_zero.environment.networking.worker_config import WorkerConfig
+from jass_mu_zero.environment.parallel_jass_environment import ParallelJassEnvironment
+from jass_mu_zero.factory import get_network, get_features
 
 
 logging.basicConfig(
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     games_per_step = int(args.max_parallel_processes)*int(args.max_parallel_threads)
     environment.start_collect_game_data_continuously(games_per_step, data_path, cancel_receiver)
 
-    from lib.util import set_allow_gpu_memory_growth
+    from jass_mu_zero.util import set_allow_gpu_memory_growth
     set_allow_gpu_memory_growth(True)
 
     network = get_network(config)

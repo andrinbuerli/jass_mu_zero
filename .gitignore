@@ -1,0 +1,11 @@
+__pycache__/
+wandb/
+ray_results/
+jass_gym.egg-info/
+*.py[cod]
+*$py.class
+
+.idea/**
+
+.wandbkey
+.github

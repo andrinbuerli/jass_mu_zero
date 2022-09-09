@@ -18,10 +18,10 @@ sys.path.append('../../')
 import numpy as np
 import itertools
 
-from lib.jass.arena.arena import Arena
+from jass_mu_zero.jass.arena.arena import Arena
 
-from lib.factory import get_agent, get_network, get_features
-from lib.environment.networking.worker_config import WorkerConfig
+from jass_mu_zero.factory import get_agent, get_network, get_features
+from jass_mu_zero.environment.networking.worker_config import WorkerConfig
 
 logging.basicConfig(
     level=logging.INFO,
@@ -62,7 +62,7 @@ def _play_games_threaded_(
         agent1_config: WorkerConfig,
         agent2_config: WorkerConfig,
         results_queue):
-    from lib.util import set_allow_gpu_memory_growth
+    from jass_mu_zero.util import set_allow_gpu_memory_growth
     set_allow_gpu_memory_growth(True)
 
     network1 = get_network(agent1_config, agent1_config.agent.network_path) if hasattr(agent1_config.agent, "network_path") else None

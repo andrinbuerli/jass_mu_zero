@@ -10,22 +10,22 @@ from jass.features.labels_action_full import LabelSetActionFull
 
 sys.path.append("../")
 
-from lib.log.wandb_logger import WandbLogger
-from lib.metrics.save import SAVE
-from lib.metrics.spkl import SPKL
-from lib.metrics.vpkl import VPKL
-from lib.metrics.sare import SARE
-from lib.metrics.lse import LSE
-from lib.environment.networking.worker_config import WorkerConfig
-from lib.environment.networking.worker_connector import WorkerConnector
-from lib.factory import get_network, get_features, get_optimizer
-from lib.log.console_logger import ConsoleLogger
-from lib.metrics.apao import APAO
-from lib.metrics.visualise_game import GameVisualisation
-from lib.metrics.metrics_manager import MetricsManager
-from lib.mu_zero.replay_buffer.file_based_replay_buffer_from_folder import FileBasedReplayBufferFromFolder
-from lib.mu_zero.replay_buffer.supervised_replay_buffer_from_folder import SupervisedReplayBufferFromFolder
-from lib.mu_zero.trainer import MuZeroTrainer
+from jass_mu_zero.log.wandb_logger import WandbLogger
+from jass_mu_zero.metrics.save import SAVE
+from jass_mu_zero.metrics.spkl import SPKL
+from jass_mu_zero.metrics.vpkl import VPKL
+from jass_mu_zero.metrics.sare import SARE
+from jass_mu_zero.metrics.lse import LSE
+from jass_mu_zero.environment.networking.worker_config import WorkerConfig
+from jass_mu_zero.environment.networking.worker_connector import WorkerConnector
+from jass_mu_zero.factory import get_network, get_features, get_optimizer
+from jass_mu_zero.log.console_logger import ConsoleLogger
+from jass_mu_zero.metrics.apao import APAO
+from jass_mu_zero.metrics.visualise_game import GameVisualisation
+from jass_mu_zero.metrics.metrics_manager import MetricsManager
+from jass_mu_zero.mu_zero.replay_buffer.file_based_replay_buffer_from_folder import FileBasedReplayBufferFromFolder
+from jass_mu_zero.mu_zero.replay_buffer.supervised_replay_buffer_from_folder import SupervisedReplayBufferFromFolder
+from jass_mu_zero.mu_zero.trainer import MuZeroTrainer
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)

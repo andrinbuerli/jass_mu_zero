@@ -9,11 +9,11 @@ from pathlib import Path
 
 sys.path.append("../")
 
-from lib.jass.service.player_service_app import PlayerServiceApp
-from lib.environment.networking.worker_config import WorkerConfig
-from lib.jass.agent.agent_from_cpp import AgentFromCpp
-from lib.jass.agent.agent_from_cpp_cheating import AgentFromCppCheating
-from lib.factory import get_agent, get_network
+from jass_mu_zero.jass.service.player_service_app import PlayerServiceApp
+from jass_mu_zero.environment.networking.worker_config import WorkerConfig
+from jass_mu_zero.jass.agent.agent_from_cpp import AgentFromCpp
+from jass_mu_zero.jass.agent.agent_from_cpp_cheating import AgentFromCppCheating
+from jass_mu_zero.factory import get_agent, get_network
 
 logging.basicConfig(
     level=logging.INFO,
