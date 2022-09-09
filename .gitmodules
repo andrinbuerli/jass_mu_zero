@@ -1,0 +1,18 @@
+[submodule "jass-kit-py"]
+	path = jass-kit-py
+	url = https://github.com/thomas-koller/jass-kit-py.git
+[submodule "extern/jass-kit-py"]
+	path = extern/jass-kit-py
+	url = https://github.com/thomas-koller/jass-kit-py.git
+[submodule "extern/jass-kit-cpp"]
+	path = extern/jass-kit-cpp
+	url = https://github.com/thomas-koller/jass-kit-cpp.git
+[submodule "extern/jass-ml-cpp"]
+	path = extern/jass-ml-cpp
+	url = https://github.com/thomas-koller/jass-ml-cpp.git
+[submodule "extern/jass-ml-py"]
+	path = extern/jass-ml-py
+	url = https://github.com/thomas-koller/jass-ml-py.git
+[submodule "extern/jass_gym"]
+	path = extern/jass_gym
+	url = https://github.com/andrinbuerli/jass_gym.git
