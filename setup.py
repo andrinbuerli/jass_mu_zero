@@ -27,7 +27,7 @@ setup(
     version="0.1",
     description="Jass MuZero implementation",
     url="tbd",
-    packages=find_namespace_packages(),
+    packages=find_namespace_packages(exclude=["extern", "test", "resources"]),
     install_requires=["wheel"] + parse_requirements("requirements.txt"),
     entry_points={
         "console_scripts": [
