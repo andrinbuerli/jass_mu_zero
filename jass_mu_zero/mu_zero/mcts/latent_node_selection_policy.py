@@ -5,11 +5,11 @@ import numpy as np
 from jass.game.const import next_player, TRUMP_FULL_OFFSET, TRUMP_FULL_P, card_values
 from jass.game.rule_schieber import RuleSchieber
 
-from lib.jass.features.features_set_cpp import FeaturesSetCpp
-from lib.mu_zero.mcts.min_max_stats import MinMaxStats
-from lib.mu_zero.mcts.node import Node
-from lib.mu_zero.network.network_base import AbstractNetwork
-from lib.mu_zero.network.support_conversion import support_to_scalar
+from jass_mu_zero.jass.features.features_set_cpp import FeaturesSetCpp
+from jass_mu_zero.mu_zero.mcts.min_max_stats import MinMaxStats
+from jass_mu_zero.mu_zero.mcts.node import Node
+from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
+from jass_mu_zero.mu_zero.network.support_conversion import support_to_scalar
 
 
 class LatentNodeSelectionPolicy:

@@ -3,12 +3,12 @@ from copy import deepcopy
 
 import numpy as np
 
-from lib.environment.networking.worker_config import WorkerConfig
-from lib.factory import get_agent, get_opponent
-from lib.jass.agent.agent import CppAgent
-from lib.jass.arena.arena import Arena
-from lib.metrics.base_async_metric import BaseAsyncMetric
-from lib.mu_zero.network.network_base import AbstractNetwork
+from jass_mu_zero.environment.networking.worker_config import WorkerConfig
+from jass_mu_zero.factory import get_agent, get_opponent
+from jass_mu_zero.jass.agent.agent import CppAgent
+from jass_mu_zero.jass.arena.arena import Arena
+from jass_mu_zero.metrics.base_async_metric import BaseAsyncMetric
+from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
 
 
 def _play_single_game_(i, agent: CppAgent, opponent: CppAgent):

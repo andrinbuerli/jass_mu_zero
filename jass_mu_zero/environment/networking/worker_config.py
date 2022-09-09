@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 from typing import Union
 
-from lib.jass.features.features_set_cpp import FeaturesSetCpp
+from jass_mu_zero.jass.features.features_set_cpp import FeaturesSetCpp
 
 
 class BaseConfig:

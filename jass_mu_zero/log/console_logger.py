@@ -1,7 +1,7 @@
 import logging
 import json
 
-from lib.log.base_logger import BaseLogger
+from jass_mu_zero.log.base_logger import BaseLogger
 
 
 class ConsoleLogger(BaseLogger):

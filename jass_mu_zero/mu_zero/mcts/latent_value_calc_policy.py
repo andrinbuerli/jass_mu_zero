@@ -1,4 +1,4 @@
-from lib.mu_zero.mcts.node import Node
+from jass_mu_zero.mu_zero.mcts.node import Node
 
 
 class LatentValueCalculationPolicy:

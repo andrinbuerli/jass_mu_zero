@@ -10,8 +10,8 @@ from time import sleep
 
 import numpy as np
 
-from lib.jass.features.features_conv_cpp import FeaturesSetCppConv
-from lib.mu_zero.replay_buffer.sum_tree import SumTree
+from jass_mu_zero.jass.features.features_conv_cpp import FeaturesSetCppConv
+from jass_mu_zero.mu_zero.replay_buffer.sum_tree import SumTree
 
 
 class FileBasedReplayBufferFromFolder:

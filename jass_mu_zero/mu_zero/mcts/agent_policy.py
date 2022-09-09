@@ -2,10 +2,10 @@ import jasscpp
 import numpy as np
 from jasscpp import GameObservationCpp
 
-from lib.jass.agent.remembering_agent import RememberingAgent
-from lib.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
-from lib.jass.features.features_set_cpp import FeaturesSetCpp
-from lib.mu_zero.network.network_base import AbstractNetwork
+from jass_mu_zero.jass.agent.remembering_agent import RememberingAgent
+from jass_mu_zero.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
+from jass_mu_zero.jass.features.features_set_cpp import FeaturesSetCpp
+from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
 
 
 class AgentPolicy(RememberingAgent):

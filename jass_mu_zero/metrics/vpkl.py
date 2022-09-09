@@ -4,10 +4,10 @@ import numpy as np
 import tensorflow as tf
 from jass.features.feature_example_buffer import parse_feature_example
 
-from lib.environment.networking.worker_config import WorkerConfig
-from lib.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
-from lib.metrics.base_async_metric import BaseAsyncMetric
-from lib.mu_zero.network.network_base import AbstractNetwork
+from jass_mu_zero.environment.networking.worker_config import WorkerConfig
+from jass_mu_zero.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
+from jass_mu_zero.metrics.base_async_metric import BaseAsyncMetric
+from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
 
 
 def _calculate_vpkl_(current_positions, policy_estimate, x, features):

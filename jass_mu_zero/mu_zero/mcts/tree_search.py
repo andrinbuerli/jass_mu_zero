@@ -3,10 +3,10 @@ from multiprocessing.pool import ThreadPool
 
 import jasscpp
 
-from lib.mu_zero.mcts.latent_value_calc_policy import LatentValueCalculationPolicy
-from lib.mu_zero.mcts.min_max_stats import MinMaxStats
-from lib.mu_zero.mcts.node import Node
-from lib.mu_zero.mcts.latent_node_selection_policy import LatentNodeSelectionPolicy
+from jass_mu_zero.mu_zero.mcts.latent_value_calc_policy import LatentValueCalculationPolicy
+from jass_mu_zero.mu_zero.mcts.min_max_stats import MinMaxStats
+from jass_mu_zero.mu_zero.mcts.node import Node
+from jass_mu_zero.mu_zero.mcts.latent_node_selection_policy import LatentNodeSelectionPolicy
 
 
 class ALPV_MCTS:

@@ -17,9 +17,9 @@ from jass.features.labels_action_full import LabelSetActionFull
 from jass.game.const import TRUMP_FULL_OFFSET, TRUMP_FULL_P
 from jasscpp import RuleSchieberCpp
 
-from lib.environment.networking.worker_config import WorkerConfig
-from lib.factory import get_agent, get_network
-from lib.jass.arena.arena import Arena
+from jass_mu_zero.environment.networking.worker_config import WorkerConfig
+from jass_mu_zero.factory import get_agent, get_network
+from jass_mu_zero.jass.arena.arena import Arena
 
 
 def _single_self_play_game_(i, agent):
@@ -151,7 +151,7 @@ def _play_games_multi_threaded_(n_games, continuous):
     continuous_games_without_reload = _play_games_multi_threaded_.continuous_games_without_reload
 
     import tensorflow as tf
-    from lib.util import set_allow_gpu_memory_growth
+    from jass_mu_zero.util import set_allow_gpu_memory_growth
     set_allow_gpu_memory_growth(True)
 
     first_call = True

@@ -6,7 +6,7 @@
 from flask import Flask
 from jass.agents.agent import Agent
 
-from lib.jass.service.player_service_route import players
+from jass_mu_zero.jass.service.player_service_route import players
 
 
 class PlayerServiceApp(Flask):

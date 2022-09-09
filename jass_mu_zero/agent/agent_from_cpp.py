@@ -1,8 +1,8 @@
 from jass.agents.agent import Agent
 from jass.game.game_observation import GameObservation
 
-from lib.jass.agent.agent import CppAgent
-from lib.util import convert_to_cpp_observation
+from jass_mu_zero.jass.agent.agent import CppAgent
+from jass_mu_zero.util import convert_to_cpp_observation
 
 
 class AgentFromCpp(Agent):

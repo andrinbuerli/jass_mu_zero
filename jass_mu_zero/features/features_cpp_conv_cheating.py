@@ -7,7 +7,7 @@ import numpy as np
 from jass.game.const import next_player, team
 from jass.game.game_util import convert_one_hot_encoded_cards_to_str_encoded_list
 
-from lib.jass.features.features_set_cpp import FeaturesSetCpp
+from jass_mu_zero.jass.features.features_set_cpp import FeaturesSetCpp
 
 
 class FeaturesSetCppConvCheating(FeaturesSetCpp):

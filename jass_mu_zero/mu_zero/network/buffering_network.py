@@ -5,7 +5,7 @@ from threading import Thread
 
 import tensorflow as tf
 
-from lib.mu_zero.network.network_base import AbstractNetwork
+from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
 
 
 class BufferingNetwork(AbstractNetwork):

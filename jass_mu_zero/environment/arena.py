@@ -22,8 +22,8 @@ from jass.game.game_observation import GameObservation
 from jass.logs.game_log_entry import GameLogEntry
 from jass.logs.log_entry_file_generator import LogEntryFileGenerator
 
-from lib.jass.agent.agent import CppAgent
-from lib.jass.features.features_set_cpp import FeaturesSetCpp
+from jass_mu_zero.jass.agent.agent import CppAgent
+from jass_mu_zero.jass.features.features_set_cpp import FeaturesSetCpp
 
 class TqdmToLogger(io.StringIO):
     """

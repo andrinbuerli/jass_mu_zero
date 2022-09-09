@@ -8,8 +8,8 @@ import torch
 from jass.game.const import PUSH, PUSH_ALT
 from jasscpp import GameObservationCpp, RuleSchieberCpp
 
-from lib.jass.agent.agent import CppAgent
-from lib.jass.features.features_conv_cpp import FeaturesSetCppConv
+from jass_mu_zero.jass.agent.agent import CppAgent
+from jass_mu_zero.jass.features.features_conv_cpp import FeaturesSetCppConv
 
 
 class AgentDQN(CppAgent):

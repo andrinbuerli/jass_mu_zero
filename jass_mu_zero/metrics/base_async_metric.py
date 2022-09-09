@@ -12,9 +12,9 @@ from multiprocessing.pool import ThreadPool
 
 import numpy as np
 
-from lib.environment.networking.worker_config import WorkerConfig
-from lib.factory import get_network
-from lib.mu_zero.network.network_base import AbstractNetwork
+from jass_mu_zero.environment.networking.worker_config import WorkerConfig
+from jass_mu_zero.factory import get_network
+from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
 
 
 class BaseAsyncMetric:

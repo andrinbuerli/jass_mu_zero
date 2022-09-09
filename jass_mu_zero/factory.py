@@ -2,17 +2,17 @@ from pathlib import Path
 
 import numpy as np
 
-from lib.environment.networking.worker_config import WorkerConfig
-from lib.jass.agent.agent import CppAgent
-from lib.jass.agent.agent_by_network_cpp import AgentByNetworkCpp
-from lib.jass.features.features_conv_cpp import FeaturesSetCppConv
-from lib.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
-from lib.jass.features.features_set_cpp import FeaturesSetCpp
+from jass_mu_zero.environment.networking.worker_config import WorkerConfig
+from jass_mu_zero.jass.agent.agent import CppAgent
+from jass_mu_zero.jass.agent.agent_by_network_cpp import AgentByNetworkCpp
+from jass_mu_zero.jass.features.features_conv_cpp import FeaturesSetCppConv
+from jass_mu_zero.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
+from jass_mu_zero.jass.features.features_set_cpp import FeaturesSetCpp
 
 
 def get_agent(config: WorkerConfig, network, greedy=False, force_local=False) -> CppAgent:
     if config.agent.type == "mu-zero-mcts":
-        from lib.mu_zero.mcts.agent_mu_zero_mcts import AgentMuZeroMCTS
+        from jass_mu_zero.mu_zero.mcts.agent_mu_zero_mcts import AgentMuZeroMCTS
         return AgentMuZeroMCTS(
             network=network,
             feature_extractor=config.network.feature_extractor,
@@ -30,17 +30,17 @@ def get_agent(config: WorkerConfig, network, greedy=False, force_local=False) ->
             use_terminal_function=config.agent.terminal_func,
         )
     elif config.agent.type == "policy":
-        from lib.mu_zero.mcts.agent_policy import AgentPolicy
+        from jass_mu_zero.mu_zero.mcts.agent_policy import AgentPolicy
         return AgentPolicy(
             network=network,
             feature_extractor=config.network.feature_extractor,
             temperature=config.agent.temperature if not greedy else 5e-2,
         )
     elif config.agent.type == "dqn":
-        from lib.jass.agent.agent_dqn import AgentDQN
+        from jass_mu_zero.jass.agent.agent_dqn import AgentDQN
         return AgentDQN(model_path=str(Path(__file__).resolve().parent.parent / "resources" / "dqn.pt"))
     elif config.agent.type == "value":
-        from lib.mu_zero.mcts.agent_value import AgentValue
+        from jass_mu_zero.mu_zero.mcts.agent_value import AgentValue
         return AgentValue(
             network=network,
             feature_extractor=config.network.feature_extractor,
@@ -95,7 +95,7 @@ def get_agent(config: WorkerConfig, network, greedy=False, force_local=False) ->
 
 def get_network(config: WorkerConfig, network_path: str = None):
     if config.network.type == "resnet":
-        from lib.mu_zero.network.resnet import MuZeroResidualNetwork
+        from jass_mu_zero.mu_zero.network.resnet import MuZeroResidualNetwork
         network = MuZeroResidualNetwork(
             observation_shape=config.network.feature_extractor.FEATURE_SHAPE,
             action_space_size=config.network.action_space_size,
@@ -134,7 +134,7 @@ def get_optimizer(config: WorkerConfig):
         if config.optimization.learning_rate_init is None:
             lr = config.optimization.learning_rate
         else:
-            from lib.mu_zero.cosine_lr_scheduler import CosineLRSchedule
+            from jass_mu_zero.mu_zero.cosine_lr_scheduler import CosineLRSchedule
             lr = CosineLRSchedule(learning_rate_init=config.optimization.learning_rate_init, max_steps=config.optimization.total_steps)
 
         return tfa.optimizers.AdamW(

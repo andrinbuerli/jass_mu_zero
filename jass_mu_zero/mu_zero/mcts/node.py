@@ -2,7 +2,7 @@ from threading import Lock
 
 import numpy as np
 
-from lib.mu_zero.mcts.min_max_stats import MinMaxStats
+from jass_mu_zero.mu_zero.mcts.min_max_stats import MinMaxStats
 
 
 class Node:

@@ -4,11 +4,11 @@ import numpy as np
 import tensorflow as tf
 from jass.features.feature_example_buffer import parse_feature_example
 
-from lib.environment.networking.worker_config import WorkerConfig
-from lib.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
-from lib.metrics.base_async_metric import BaseAsyncMetric
-from lib.mu_zero.network.network_base import AbstractNetwork
-from lib.mu_zero.network.support_conversion import support_to_scalar
+from jass_mu_zero.environment.networking.worker_config import WorkerConfig
+from jass_mu_zero.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
+from jass_mu_zero.metrics.base_async_metric import BaseAsyncMetric
+from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
+from jass_mu_zero.mu_zero.network.support_conversion import support_to_scalar
 
 
 def _calculate_mae_(reward_true, reward_estimate):
