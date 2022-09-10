@@ -16,15 +16,4 @@ services:
                   device_ids: ['0']
                   capabilities: [gpu]
 
-    test:
-        build:
-            context: .
-            network: "host"
-            args:
-                DEV: 1
-        entrypoint: []
-        volumes:
-            - .:/app
-        command: pytest --forked -n auto --timeout=120 /app/test -v
-
 

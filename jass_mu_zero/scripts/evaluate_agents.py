@@ -24,14 +24,6 @@ import itertools
 from jass_mu_zero.factory import get_agent, get_network, get_features
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
 
-logging.basicConfig(
-    level=logging.INFO,
-    stream=sys.stdout,
-    format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s: %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
-
-
 def _play_games_(n_games_to_play, general_config, agent1_config, agent2_config, network1, network2, queue):
     agent1 = get_agent(agent1_config, network1,
                        greedy=agent1_config.agent.greedy if hasattr(agent1_config.agent, "greedy") else False)

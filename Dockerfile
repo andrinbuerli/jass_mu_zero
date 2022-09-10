@@ -48,13 +48,10 @@ RUN pip install --upgrade setuptools
 
 RUN pip install -v -e .
 
-RUN if [[ -z "$DEV" ]];\
-    then echo "No DEV mode";\
-    else pip install -r requirements-dev.txt; fi
+RUN pip install -r requirements-dev.txt
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 ENV XLA_PYTHON_CLIENT_MEM_FRACTION=.7
 
-ENTRYPOINT ["sh", "/entrypoint.sh"]
+ENTRYPOINT ["sh", "/app/entrypoint.sh"]
