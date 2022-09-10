@@ -6,7 +6,7 @@ import numpy as np
 
 from jass_mu_zero.factory import get_network, get_optimizer
 from jass_mu_zero.log.console_logger import ConsoleLogger
-from jass_mu_zero.metrics.metrics_manager import MetricsManager
+from jass_mu_zero.mu_zero.metrics.metrics_manager import MetricsManager
 from jass_mu_zero.mu_zero.replay_buffer.file_based_replay_buffer_from_folder import FileBasedReplayBufferFromFolder
 from jass_mu_zero.mu_zero.trainer import MuZeroTrainer
 from test.util import get_test_config
@@ -17,22 +17,19 @@ def get_replay_buffer(cheating=False):
         max_buffer_size=1000,
         batch_size=32,
         nr_of_batches=1,
-        min_trajectory_length=5,
-        max_trajectory_length=5,
+        trajectory_length=5,
         data_file_ending=".imperfect.jass-data.pkl" if not cheating else ".perfect.jass-data.pkl",
-        episode_file_ending=".imperfect.jass-episode.pkl" if not cheating else ".perfect.jass-episode.pkl",
+        trajectory_file_ending=".imperfect.jass-episode.pkl" if not cheating else ".perfect.jass-episode.pkl",
         game_data_folder=Path(__file__).parent.parent / "resources",
-        episode_data_folder=Path(__file__).parent / f"tmp_episodes{str(uuid.uuid1())}",
+        trajectory_data_folder=Path(__file__).parent / f"tmp_episodes{str(uuid.uuid1())}",
         max_samples_per_episode=2,
         min_non_zero_prob_samples=1,
         clean_up_files=False,
         mdp_value=False,
         gamma=1,
         use_per=False,
-        valid_policy_target=False,
         clean_up_episodes=True,
         start_sampling=False,
-        supervised_targets=False,
         td_error=False,
         value_based_per=False
     )

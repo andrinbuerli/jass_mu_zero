@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
-from jass_mu_zero.metrics.base_async_metric import BaseAsyncMetric
+from jass_mu_zero.mu_zero.metrics.base_async_metric import BaseAsyncMetric
 from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
 from test.util import get_test_config
 

@@ -2,8 +2,7 @@ from pathlib import Path
 
 from jass.features.labels_action_full import LabelSetActionFull
 
-from jass_mu_zero.jass.features.features_conv_cpp import FeaturesSetCppConv
-from jass_mu_zero.metrics.save import SAVE
+from jass_mu_zero.mu_zero.metrics.save import SAVE
 from test.util import get_test_config
 
 

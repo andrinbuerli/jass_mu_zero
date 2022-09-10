@@ -1,9 +1,9 @@
 import jasscpp
 
+from jass_mu_zero.agent.agent_mu_zero_mcts import AgentMuZeroMCTS
 from jass_mu_zero.factory import get_network
-from jass_mu_zero.jass.features.features_conv_cpp import FeaturesSetCppConv
-from jass_mu_zero.mu_zero.mcts.agent_mu_zero_mcts import AgentMuZeroMCTS
 from jass_mu_zero.mu_zero.network.resnet import MuZeroResidualNetwork
+from jass_mu_zero.observation.features_conv_cpp import FeaturesSetCppConv
 from test.util import get_test_config
 
 

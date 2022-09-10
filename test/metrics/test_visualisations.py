@@ -2,9 +2,7 @@ from pathlib import Path
 
 from jass.features.labels_action_full import LabelSetActionFull
 
-from jass_mu_zero.jass.features.features_conv_cpp import FeaturesSetCppConv
-from jass_mu_zero.metrics.sare import SARE
-from jass_mu_zero.metrics.visualise_game import GameVisualisation
+from jass_mu_zero.mu_zero.metrics.visualise_game import GameVisualisation
 from test.util import get_test_config
 
 

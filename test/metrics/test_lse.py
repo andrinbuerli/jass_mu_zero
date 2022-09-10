@@ -2,7 +2,7 @@ from pathlib import Path
 
 from jass.features.labels_action_full import LabelSetActionFull
 
-from jass_mu_zero.metrics.lse import LSE
+from jass_mu_zero.mu_zero.metrics.lse import LSE
 from test.util import get_test_config
 
 

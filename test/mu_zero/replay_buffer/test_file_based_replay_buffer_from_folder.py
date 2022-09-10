@@ -13,21 +13,18 @@ def test_buffer_size():
         max_buffer_size=1000,
         batch_size=32,
         nr_of_batches=1,
-        min_trajectory_length=5,
-        max_trajectory_length=5,
+        trajectory_length=5,
         data_file_ending=".perfect.jass-data.pkl",
-        episode_file_ending=".perfect.jass-episode.pkl",
+        trajectory_file_ending=".perfect.jass-episode.pkl",
         game_data_folder=Path(__file__).parent.parent.parent / "resources",
-        episode_data_folder=Path(__file__).parent / f"tmp_episodes{str(uuid.uuid1())}",
+        trajectory_data_folder=Path(__file__).parent / f"tmp_episodes{str(uuid.uuid1())}",
         max_samples_per_episode=2,
         min_non_zero_prob_samples=1,
         clean_up_files=False,
         mdp_value=False,
         gamma=1,
         use_per=False,
-        valid_policy_target=False,
         clean_up_episodes=True,
-        supervised_targets=False,
         td_error=False,
         value_based_per=False
     )
@@ -45,21 +42,18 @@ def test_batch_size():
         max_buffer_size=1000,
         batch_size=32,
         nr_of_batches=1,
-        min_trajectory_length=5,
-        max_trajectory_length=5,
+        trajectory_length=5,
         data_file_ending=".perfect.jass-data.pkl",
-        episode_file_ending=".perfect.jass-episode.pkl",
+        trajectory_file_ending=".perfect.jass-episode.pkl",
         game_data_folder=Path(__file__).parent.parent.parent / "resources",
-        episode_data_folder=Path(__file__).parent / f"tmp_episodes{str(uuid.uuid1())}",
+        trajectory_data_folder=Path(__file__).parent / f"tmp_episodes{str(uuid.uuid1())}",
         max_samples_per_episode=2,
         min_non_zero_prob_samples=1,
         clean_up_files=False,
         mdp_value=False,
         gamma=1,
         use_per=False,
-        valid_policy_target=False,
         clean_up_episodes=True,
-        supervised_targets=False,
         td_error=False,
         value_based_per=False
     )
@@ -80,21 +74,18 @@ def test_min_non_zero_prob_samples():
         max_buffer_size=1000,
         batch_size=32,
         nr_of_batches=1,
-        min_trajectory_length=5,
-        max_trajectory_length=5,
+        trajectory_length=5,
         data_file_ending=".perfect.jass-data.pkl",
-        episode_file_ending=".perfect.jass-episode.pkl",
+        trajectory_file_ending=".perfect.jass-episode.pkl",
         game_data_folder=Path(__file__).parent.parent.parent / "resources",
-        episode_data_folder=Path(__file__).parent / f"tmp_episodes{str(uuid.uuid1())}",
+        trajectory_data_folder=Path(__file__).parent / f"tmp_episodes{str(uuid.uuid1())}",
         max_samples_per_episode=2,
         min_non_zero_prob_samples=1,
         clean_up_files=False,
         mdp_value=False,
         gamma=1,
         use_per=False,
-        valid_policy_target=False,
         clean_up_episodes=True,
-        supervised_targets=False,
         td_error=False,
         value_based_per=False
     )
@@ -117,21 +108,18 @@ def test_buffer_restore():
         max_buffer_size=1000,
         batch_size=32,
         nr_of_batches=1,
-        min_trajectory_length=5,
-        max_trajectory_length=5,
+        trajectory_length=5,
         data_file_ending=".perfect.jass-data.pkl",
-        episode_file_ending=".perfect.jass-episode.pkl",
+        trajectory_file_ending=".perfect.jass-episode.pkl",
         game_data_folder=Path(__file__).parent.parent.parent / "resources",
-        episode_data_folder=folder,
+        trajectory_data_folder=folder,
         max_samples_per_episode=2,
         min_non_zero_prob_samples=1,
         clean_up_files=False,
         mdp_value=False,
         gamma=1,
         use_per=False,
-        valid_policy_target=False,
         clean_up_episodes=True,
-        supervised_targets=False,
         td_error=False,
         value_based_per=False
     )
@@ -146,22 +134,19 @@ def test_buffer_restore():
         max_buffer_size=1000,
         batch_size=32,
         nr_of_batches=1,
-        min_trajectory_length=5,
-        max_trajectory_length=5,
+        trajectory_length=5,
         data_file_ending=".perfect.jass-data.pkl",
-        episode_file_ending=".perfect.jass-episode.pkl",
+        trajectory_file_ending=".perfect.jass-episode.pkl",
         game_data_folder=Path(__file__).parent.parent.parent / "resources",
-        episode_data_folder=folder,
+        trajectory_data_folder=folder,
         max_samples_per_episode=2,
         min_non_zero_prob_samples=1,
         clean_up_files=False,
         mdp_value=False,
         gamma=1,
         use_per=False,
-        valid_policy_target=False,
         clean_up_episodes=True,
         start_sampling=False,
-        supervised_targets=False,
         td_error=False,
         value_based_per=False
     )
@@ -177,21 +162,18 @@ def test_sample_trajectory():
         max_buffer_size=1000,
         batch_size=32,
         nr_of_batches=1,
-        min_trajectory_length=5,
-        max_trajectory_length=5,
+        trajectory_length=5,
         data_file_ending=".perfect.jass-data.pkl",
-        episode_file_ending=".perfect.jass-episode.pkl",
+        trajectory_file_ending=".perfect.jass-episode.pkl",
         game_data_folder=Path(__file__).parent.parent.parent / "resources",
-        episode_data_folder=Path(__file__).parent / f"tmp_episodes{str(uuid.uuid1())}",
+        trajectory_data_folder=Path(__file__).parent / f"tmp_episodes{str(uuid.uuid1())}",
         max_samples_per_episode=2,
         min_non_zero_prob_samples=1,
         clean_up_files=False,
         mdp_value=False,
         gamma=1,
         use_per=False,
-        valid_policy_target=False,
         clean_up_episodes=True,
-        supervised_targets=False,
         td_error=False,
         value_based_per=False
     )
@@ -200,10 +182,10 @@ def test_sample_trajectory():
     total = testee.sum_tree.total()
     s = np.random.uniform(0, total)
     idx, priority, identifier = testee.sum_tree.get(s, timeout=10)
-    file = testee.episode_data_folder / f"{identifier}{testee.episode_file_ending}"
+    file = testee.trajectory_data_folder / f"{identifier}{testee.data_file_ending}"
     with open(str(file), "rb") as f:
         episode = pickle.load(f)
-    states, actions, rewards, probs, outcomes = testee._sample_trajectory(episode, i=36, sampled_trajectory_length=5)
+    states, actions, rewards, probs, outcomes = testee._sample_trajectory(episode, i=36)
 
     assert probs[-1, :].sum() == 0 and rewards[-1, :].sum() == 0 and outcomes[-1, :].sum() == 157
 
@@ -216,21 +198,18 @@ def test_sample_trajectory_mdp_value():
         max_buffer_size=1000,
         batch_size=32,
         nr_of_batches=1,
-        min_trajectory_length=5,
-        max_trajectory_length=5,
+        trajectory_length=5,
         data_file_ending=".perfect.jass-data.pkl",
-        episode_file_ending=".perfect.jass-episode.pkl",
+        trajectory_file_ending=".perfect.jass-episode.pkl",
         game_data_folder=Path(__file__).parent.parent.parent / "resources",
-        episode_data_folder=Path(__file__).parent / f"tmp_episodes{str(uuid.uuid1())}",
+        trajectory_data_folder=Path(__file__).parent / f"tmp_episodes{str(uuid.uuid1())}",
         max_samples_per_episode=2,
         min_non_zero_prob_samples=1,
         clean_up_files=False,
         mdp_value=True,
         gamma=1,
         use_per=False,
-        valid_policy_target=False,
         clean_up_episodes=True,
-        supervised_targets=False,
         td_error=False,
         value_based_per=False
     )
@@ -239,11 +218,11 @@ def test_sample_trajectory_mdp_value():
     total = testee.sum_tree.total()
     s = np.random.uniform(0, total)
     idx, priority, identifier = testee.sum_tree.get(s, timeout=10)
-    file = testee.episode_data_folder / f"{identifier}{testee.episode_file_ending}"
+    file = testee.trajectory_data_folder / f"{identifier}{testee.data_file_ending}"
     with open(str(file), "rb") as f:
         episode = pickle.load(f)
 
-    states, actions, rewards, probs, outcomes = testee._sample_trajectory(episode, i=0, sampled_trajectory_length=10)
+    states, actions, rewards, probs, outcomes = testee._sample_trajectory(episode, i=0)
 
     assert (outcomes[0] != outcomes[-1]).any()
 

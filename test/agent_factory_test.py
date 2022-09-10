@@ -5,7 +5,7 @@ from jass.game.game_util import deal_random_hand
 
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
 from jass_mu_zero.factory import get_agent, get_opponent, get_network
-from jass_mu_zero.jass.features.features_conv_cpp import FeaturesSetCppConv
+from jass_mu_zero.observation.features_conv_cpp import FeaturesSetCppConv
 
 
 def test_get_mu_zero_agent():

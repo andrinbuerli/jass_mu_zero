@@ -6,7 +6,7 @@ from jass.game.game_state_util import state_from_complete_game, observation_from
 from jass.game.rule_schieber import RuleSchieber
 from jasscpp import RuleSchieberCpp
 
-from jass_mu_zero.jass.features.features_conv_cpp import FeaturesSetCppConv
+from jass_mu_zero.observation.features_conv_cpp import FeaturesSetCppConv
 from jass_mu_zero.util import convert_to_cpp_observation
 
 

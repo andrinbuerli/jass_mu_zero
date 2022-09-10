@@ -3,16 +3,14 @@ import json
 import jasscpp
 import numpy as np
 from jass.arena.dealing_card_random_strategy import DealingCardRandomStrategy
-from jass.game.game_sim import GameSim
 from jass.game.game_state import GameState
-from jass.game.game_state_util import state_from_complete_game, observation_from_state
+from jass.game.game_state_util import observation_from_state, state_from_complete_game
 
 from jass_mu_zero.factory import get_network
-from jass_mu_zero.jass.features.features_conv_cpp import FeaturesSetCppConv
+from jass_mu_zero.mu_zero.mcts.latent_node_selection_policy import LatentNodeSelectionPolicy
 from jass_mu_zero.mu_zero.mcts.min_max_stats import MinMaxStats
 from jass_mu_zero.mu_zero.mcts.node import Node
-from jass_mu_zero.mu_zero.mcts.latent_node_selection_policy import LatentNodeSelectionPolicy
-from jass_mu_zero.mu_zero.network.resnet import MuZeroResidualNetwork
+from jass_mu_zero.observation.features_conv_cpp import FeaturesSetCppConv
 from jass_mu_zero.util import convert_to_cpp_observation
 from test.util import get_test_config
 

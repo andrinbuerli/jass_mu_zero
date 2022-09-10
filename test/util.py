@@ -1,7 +1,7 @@
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
-from jass_mu_zero.jass.features.features_conv_cpp import FeaturesSetCppConv
-from jass_mu_zero.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
 from jass_mu_zero.mu_zero.network.resnet import MuZeroResidualNetwork
+from jass_mu_zero.observation.features_conv_cpp import FeaturesSetCppConv
+from jass_mu_zero.observation.features_cpp_conv_cheating import FeaturesSetCppConvCheating
 
 
 def get_test_config(cheating=False):

@@ -3,13 +3,12 @@ from pathlib import Path
 import jasscpp
 
 from jass_mu_zero.factory import get_network
-from jass_mu_zero.jass.features.features_conv_cpp import FeaturesSetCppConv
 from jass_mu_zero.mu_zero.mcts.latent_node_selection_policy import LatentNodeSelectionPolicy
 from jass_mu_zero.mu_zero.mcts.latent_value_calc_policy import LatentValueCalculationPolicy
 from jass_mu_zero.mu_zero.mcts.min_max_stats import MinMaxStats
 from jass_mu_zero.mu_zero.mcts.tree_search import ALPV_MCTS
 from jass_mu_zero.mu_zero.network.buffering_network import BufferingNetwork
-from jass_mu_zero.mu_zero.network.resnet import MuZeroResidualNetwork
+from jass_mu_zero.observation.features_conv_cpp import FeaturesSetCppConv
 from test.util import get_test_config
 
 
