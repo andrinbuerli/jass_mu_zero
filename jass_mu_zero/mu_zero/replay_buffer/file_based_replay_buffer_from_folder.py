@@ -11,7 +11,6 @@ from time import sleep
 import numpy as np
 
 from jass_mu_zero.mu_zero.replay_buffer.sum_tree import SumTree
-from jass_mu_zero.observation.features_conv_cpp import FeaturesSetCppConv
 
 
 class FileBasedReplayBufferFromFolder:
@@ -20,43 +19,36 @@ class FileBasedReplayBufferFromFolder:
             max_buffer_size: int,
             batch_size: int,
             nr_of_batches: int,
-            max_trajectory_length: int,
-            min_trajectory_length: int,
+            trajectory_length: int,
             mdp_value: bool,
             td_error: bool,
-            valid_policy_target: bool,
             gamma: float,
             game_data_folder: Path,
-            episode_data_folder: Path,
+            trajectory_data_folder: Path,
             max_samples_per_episode: int,
             min_non_zero_prob_samples: int,
             use_per: bool,
-            value_based_per:bool,
-            supervised_targets:bool,
-            max_updates=20,
+            value_based_per: bool,
             data_file_ending=".jass-data.pkl",
-            episode_file_ending=".jass-episode.pkl",
+            trajectory_file_ending=".jass-episode.pkl",
             cache_path: Path = None,
-            clean_up_files = True,
-            clean_up_episodes = False,
-            start_sampling = True):
+            clean_up_files=True,
+            clean_up_episodes=False,
+            start_sampling=True):
         """
         Expects entries in queue with semantics
-        (states, actions, rewards, probs, outcomes)
+        (observations, actions, rewards, probs, outcomes)
         """
 
-        self.supervised_targets = supervised_targets
         self.value_based_per = value_based_per
         self.td_error = td_error
         self.use_per = use_per
-        self.valid_policy_target = valid_policy_target
         self.clean_up_episodes = clean_up_episodes
         self.min_non_zero_prob_samples = min_non_zero_prob_samples
         self.max_samples_per_episode = max_samples_per_episode
-        self.episode_data_folder = episode_data_folder
-        self.episode_file_ending = episode_file_ending
-        self.max_trajectory_length = max_trajectory_length
-        self.min_trajectory_length = min_trajectory_length
+        self.trajectory_data_folder = trajectory_data_folder
+        self.data_file_ending = trajectory_file_ending
+        self.trajectory_length = trajectory_length
         self.nr_of_batches = nr_of_batches
         self.gamma = gamma
         self.mdp_value = mdp_value
@@ -64,14 +56,13 @@ class FileBasedReplayBufferFromFolder:
         self.clean_up_files = clean_up_files
         self.data_file_ending = data_file_ending
         self.game_data_folder = game_data_folder
-        self.max_updates = max_updates
         self.batch_size = batch_size
         self.max_buffer_size = max_buffer_size
 
         self.sum_tree = SumTree(capacity=max_buffer_size)
 
         self.game_data_folder.mkdir(parents=True, exist_ok=True)
-        self.episode_data_folder.mkdir(parents=True, exist_ok=True)
+        self.trajectory_data_folder.mkdir(parents=True, exist_ok=True)
 
         self._size_of_last_update = 0
 
@@ -119,22 +110,15 @@ class FileBasedReplayBufferFromFolder:
         for _ in range(nr_of_batches):
             states, actions, rewards, probs, outcomes, sample_weights = [], [], [], [], [], []
 
-            if self.max_trajectory_length > self.min_trajectory_length:
-                sampled_trajectory_length = np.random.choice(
-                    range(self.min_trajectory_length, self.max_trajectory_length))
-            else:
-                sampled_trajectory_length = self.max_trajectory_length
             for __ in range(self.batch_size):
                 while True:
                     try:
                         total = self.sum_tree.total()
                         s = np.random.uniform(0, total)
                         idx, priority, identifier = self.sum_tree.get(s, timeout=10)
-                        file = self.episode_data_folder / f"{identifier}{self.episode_file_ending}"
+                        file = self.trajectory_data_folder / f"{identifier}{self.data_file_ending}"
                         with open(str(file), "rb") as f:
-                            episode = pickle.load(f)
-
-                        trajectory = self._sample_trajectory(episode, sampled_trajectory_length)
+                            trajectory = pickle.load(f)
 
                         if self.use_per:
                             P_i = priority / total
@@ -190,7 +174,7 @@ class FileBasedReplayBufferFromFolder:
                 self.sum_tree = pickle.load(f)
             logging.info(f"restored replay buffer from {restore_path}")
         else:
-            for file in self.episode_data_folder.glob("*"):
+            for file in self.trajectory_data_folder.glob("*"):
                 try:
                     with open(file, "rb") as f:
                         states, actions, rewards, probs, values = pickle.load(f)
@@ -198,7 +182,7 @@ class FileBasedReplayBufferFromFolder:
                     continue
                 priority = self._get_priority(rewards, values)
                 self.sum_tree.add(data=file.name.split(".")[0], p=priority)
-            logging.info(f"restored replay buffer ({self.sum_tree.filled_size}) from {self.episode_data_folder}")
+            logging.info(f"restored replay buffer ({self.sum_tree.filled_size}) from {self.trajectory_data_folder}")
 
     def _get_priority(self, rewards, values):
         if self.value_based_per:
@@ -235,113 +219,92 @@ class FileBasedReplayBufferFromFolder:
         for file in files:
             try:
                 with open(file, "rb") as f:
-                    states, actions, rewards, probs, values = pickle.load(f)
+                    observations, actions, rewards, probs, values = pickle.load(f)
 
                 if self.clean_up_files:
                     file.unlink()
 
-                assert len(states) == len(actions) == len(rewards) == len(probs) == len(values)
+                assert len(observations) == len(actions) == len(rewards) == len(probs) == len(values)
 
-                for s, a, r, p, v in zip(states, actions, rewards, probs, values):
-                    #assert (r.sum(axis=0) == o[0]).all()
-                    identifier = str(uuid.uuid4())
-                    episode_file = self.episode_data_folder / f"{identifier}{self.episode_file_ending}"
-                    with open(str(episode_file), "wb") as f:
-                        pickle.dump((s, a, r, p, v), f)
+                nr_new_trajectories = 0
+                for o, a, r, p, v in zip(observations, actions, rewards, probs, values):
+                    episode_length = 37 if observations[-1].sum() == 0 else 38
 
-                    if len(self.zero_prob_sample_indices) == 0:
-                        old_identifier = self.sum_tree.get_data_at_cursor()
-                        old_episode_file = self.episode_data_folder / f"{old_identifier}{self.episode_file_ending}"
+                    assert np.allclose(p[:episode_length].sum(axis=-1), 1)
 
-                        if old_episode_file.exists() and self.clean_up_files:
-                            old_episode_file.unlink()
+                    for i in range(episode_length):
+                        identifier = str(uuid.uuid4())
+                        trajectory = self._sample_trajectory((o, a, r, p, v), episode_length=episode_length, i=i)
+                        trajectory_file = self.trajectory_data_folder / f"{identifier}{self.data_file_ending}"
+                        with open(str(trajectory_file), "wb") as f:
+                            pickle.dump(trajectory, f)
 
-                        priority = self._get_priority(r, v)
-                        self.sum_tree.add(data=identifier, p=priority)
-                    else:
-                        idx = self.zero_prob_sample_indices.pop(0)
-                        old_identifier = self.sum_tree.get_data_at(idx)
-                        old_episode_file = self.episode_data_folder / f"{old_identifier}{self.episode_file_ending}"
+                        self.add_to_tree(identifier, r, v)
+                        nr_new_trajectories += 1
 
-                        if old_episode_file.exists() and self.clean_up_files:
-                            old_episode_file.unlink()
+                size_of_last_update += nr_new_trajectories
 
-                        self.sum_tree.update(data=identifier,
-                                             idx=idx,
-                                             p=self.max_samples_per_episode)
-
-                size_of_last_update += len(states)
-
-                del states, actions, rewards, probs, values
+                del observations, actions, rewards, probs, values
                 gc.collect()
             except Exception as e:
-                logging.warning(f"failed reading file {file}. Exception: {e}, continuing anyway") #, traceback: {traceback.format_exc()}")
+                logging.warning(
+                    f"failed reading file {file}. Exception: {e}, continuing anyway")  # , traceback: {traceback.format_exc()}")
                 # if self.clean_up_files:
                 #    file.unlink()
 
-        logging.info(f"update done, added {size_of_last_update} episodes ")
-
+        logging.info(f"update done, added {size_of_last_update} trajectories.")
         self._size_of_last_update += size_of_last_update
 
-    def _sample_trajectory(self, episode, sampled_trajectory_length, i=None):
+    def add_to_tree(self, identifier, r, v):
+        if len(self.zero_prob_sample_indices) == 0:
+            old_identifier = self.sum_tree.get_data_at_cursor()
+            old_episode_file = self.trajectory_data_folder / f"{old_identifier}{self.data_file_ending}"
+
+            if old_episode_file.exists() and self.clean_up_files:
+                old_episode_file.unlink()
+
+            priority = self._get_priority(r, v)
+            self.sum_tree.add(data=identifier, p=priority)
+        else:
+            idx = self.zero_prob_sample_indices.pop(0)
+            old_identifier = self.sum_tree.get_data_at(idx)
+            old_episode_file = self.trajectory_data_folder / f"{old_identifier}{self.data_file_ending}"
+
+            if old_episode_file.exists() and self.clean_up_files:
+                old_episode_file.unlink()
+
+            self.sum_tree.update(data=identifier,
+                                 idx=idx,
+                                 p=self.max_samples_per_episode)
+
+    def _sample_trajectory(self, episode, episode_length, i):
         states, actions, rewards, probs, values = episode
-        episode_length = 37 if states[-1].sum() == 0 else 38
 
-        # assert (rewards.sum(axis=0) == outcomes[0]).all()
-
-        if self.valid_policy_target:
-            valid_cards = states.reshape(-1, 36, 45)[:, :, FeaturesSetCppConv.CH_CARDS_VALID]
-            valid_trumps = np.ones((states.shape[0], 7))
-            valid_trumps[:, -1] *= states.reshape(-1, 36, 45)[:, 0, 44]
-            valid_trumps *= states.reshape(-1, 36, 45)[:, 0, 43][:, None]
-
-            valid_actions = np.concatenate((valid_cards, valid_trumps), axis=1)
-            valid_actions /= np.maximum(np.nansum(valid_actions, axis=1, keepdims=True), 1)
-
-            probs = valid_actions
-            episode = states, actions, rewards, probs, values
-
-        assert np.allclose(probs[:episode_length].sum(axis=-1), 1)
-
-        states, actions, rewards, probs, values = episode
-        if self.supervised_targets:
-            values = np.array([
-                np.sum([
-                    x * self.gamma**i for i, x in enumerate(rewards[k:])
-                ], axis=0) for k in range(rewards.shape[0])
-            ])
-
-            one_hot = np.squeeze(np.eye(probs.shape[-1])[actions.reshape(-1)[:episode_length]])
-            probs = one_hot
-
-            episode = states, actions, rewards, probs, values
-        elif self.td_error:
+        if self.td_error:
             episode = states, actions, rewards, probs, values
         elif self.mdp_value:
             values = np.array([
                 np.sum([
-                    x * self.gamma**i for i, x in enumerate(rewards[k:])
+                    x * self.gamma ** i for i, x in enumerate(rewards[k:])
                 ], axis=0) for k in range(rewards.shape[0])
             ])
             episode = states, actions, rewards, probs, values
         else:
             values = np.array([
                 np.sum([
-                    x * self.gamma**i for i, x in enumerate(rewards)
+                    x * self.gamma ** i for i, x in enumerate(rewards)
                 ], axis=0) for _ in range(rewards.shape[0])
             ])
             episode = states, actions, rewards, probs, values
 
         # create trajectories beyond terminal state
-        i = np.random.choice(range(episode_length)) if i is None else i
-
-        indices = [i+j for j in range(sampled_trajectory_length) if i+j <= episode_length-1]
+        indices = [i + j for j in range(self.trajectory_length) if i + j <= episode_length - 1]
         assert all([x >= 0 for x in indices])
         trajectory = [x[indices] for x in episode]
 
-        if len(indices) < sampled_trajectory_length:
+        if len(indices) < self.trajectory_length:
             states, actions, rewards, probs, values = trajectory
-            for _ in range(sampled_trajectory_length - len(indices)):
+            for _ in range(self.trajectory_length - len(indices)):
                 states = np.concatenate((states, np.zeros_like(states[-1], dtype=np.float32)[np.newaxis]), axis=0)
                 actions = np.concatenate((actions, actions[-1][np.newaxis]), axis=0)
                 rewards = np.concatenate((rewards, np.zeros_like(rewards[-1], dtype=np.int32)[np.newaxis]), axis=0)
@@ -358,5 +321,4 @@ class FileBasedReplayBufferFromFolder:
     def __del__(self):
         self.stop_sampling()
         if self.clean_up_episodes:
-            shutil.rmtree(str(self.episode_data_folder))
-
+            shutil.rmtree(str(self.trajectory_data_folder))
