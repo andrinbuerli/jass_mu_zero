@@ -11,18 +11,18 @@ from jass.features.labels_action_full import LabelSetActionFull
 sys.path.append("../")
 
 from jass_mu_zero.log.wandb_logger import WandbLogger
-from jass_mu_zero.metrics.save import SAVE
-from jass_mu_zero.metrics.spkl import SPKL
-from jass_mu_zero.metrics.vpkl import VPKL
-from jass_mu_zero.metrics.sare import SARE
-from jass_mu_zero.metrics.lse import LSE
+from jass_mu_zero.mu_zero.metrics.save import SAVE
+from jass_mu_zero.mu_zero.metrics.spkl import SPKL
+from jass_mu_zero.mu_zero.metrics.vpkl import VPKL
+from jass_mu_zero.mu_zero.metrics.sare import SARE
+from jass_mu_zero.mu_zero.metrics.lse import LSE
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
 from jass_mu_zero.environment.networking.worker_connector import WorkerConnector
 from jass_mu_zero.factory import get_network, get_features, get_optimizer
 from jass_mu_zero.log.console_logger import ConsoleLogger
-from jass_mu_zero.metrics.apao import APAO
-from jass_mu_zero.metrics.visualise_game import GameVisualisation
-from jass_mu_zero.metrics.metrics_manager import MetricsManager
+from jass_mu_zero.mu_zero.metrics.apao import APAO
+from jass_mu_zero.mu_zero.metrics.visualise_game import GameVisualisation
+from jass_mu_zero.mu_zero.metrics.metrics_manager import MetricsManager
 from jass_mu_zero.mu_zero.replay_buffer.file_based_replay_buffer_from_folder import FileBasedReplayBufferFromFolder
 from jass_mu_zero.mu_zero.replay_buffer.supervised_replay_buffer_from_folder import SupervisedReplayBufferFromFolder
 from jass_mu_zero.mu_zero.trainer import MuZeroTrainer
@@ -83,12 +83,10 @@ class MuZeroTrainingCLI:
                 batch_size=worker_config.optimization.batch_size,
                 nr_of_batches=worker_config.optimization.updates_per_step,
                 trajectory_length=worker_config.optimization.trajectory_length,
-                min_trajectory_length=worker_config.optimization.min_trajectory_length,
                 game_data_folder=data_path / "game_data",
                 clean_up_files=True,
                 cache_path=data_path,
                 mdp_value=worker_config.agent.mdp_value,
-                valid_policy_target=worker_config.optimization.valid_policy_target,
                 gamma=worker_config.agent.discount,
                 start_sampling=False,
                 trajectory_data_folder=data_path / "episodes_data",
@@ -96,8 +94,7 @@ class MuZeroTrainingCLI:
                 min_non_zero_prob_samples=worker_config.optimization.min_non_zero_prob_samples,
                 use_per=worker_config.optimization.use_per,
                 value_based_per=worker_config.optimization.value_based_per,
-                td_error=worker_config.optimization.value_td_5_step,
-                supervised_targets=worker_config.optimization.supervised_targets)
+                td_error=worker_config.optimization.value_td_5_step,)
 
         replay_buffer.restore(tree_from_file=worker_config.optimization.restore_buffer_tree_from_file)
 
