@@ -41,12 +41,11 @@ RUN adduser user --uid 1000
 RUN adduser user sudo
 USER user
 
-RUN pip install --upgrade pip
-#RUN pip install --upgrade setuptools
-
 RUN git config --global --add safe.directory /app
 
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install --upgrade setuptools
+
 RUN pip install -v -e .
 
 RUN if [[ -z "$DEV" ]];\
@@ -55,8 +54,6 @@ RUN if [[ -z "$DEV" ]];\
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-
-WORKDIR /app
 
 ENV XLA_PYTHON_CLIENT_MEM_FRACTION=.7
 

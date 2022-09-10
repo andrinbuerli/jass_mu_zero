@@ -1,8 +1,7 @@
-import os
 import subprocess
 from pathlib import Path
 
-from setuptools import find_namespace_packages, setup
+from setuptools import setup
 
 
 def parse_requirements(filename):
@@ -24,10 +23,10 @@ subprocess.check_call(["pip", "install", "-e", "."], cwd=cwd / "extern" / "jass_
 
 setup(
     name="jass_mu_zero",
-    version="0.1",
+    version="1.0",
     description="Jass MuZero implementation",
     url="tbd",
-    packages=find_namespace_packages(),
+    packages=["jass_mu_zero"],
     install_requires=["wheel"] + parse_requirements("requirements.txt"),
     entry_points={
         "console_scripts": [
