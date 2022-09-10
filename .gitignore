@@ -6,6 +6,7 @@ jass_gym.egg-info/
 *$py.class
 
 .idea/**
+extern/
 
 .wandbkey
 .github

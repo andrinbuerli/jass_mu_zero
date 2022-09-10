@@ -1,19 +1,24 @@
+# HSLU
+#
+# Created by Thomas Koller on 06.07.2019
+#
 import jasscpp
 import numpy as np
 from jass.game.const import next_player, team
 from jass.game.game_util import convert_one_hot_encoded_cards_to_str_encoded_list
 
-from jass_mu_zero.jass.features.features_set_cpp import FeaturesSetCpp
+from jass_mu_zero.observation.features_set_cpp import FeaturesSetCpp
 
 
-class FeaturesSetCppConv(FeaturesSetCpp):
+class FeaturesSetCppConvCheating(FeaturesSetCpp):
     """
     FeaturesSet set for convolutional neural networks with all data in 4x9xK format, with K channels at the end.
+
     The set is intended for both trump and card play, similar to FeatureSetDenseFull
     """
-    FEATURE_LENGTH = 1620             # type: int
+    FEATURE_LENGTH = 1728             # type: int
 
-    FEATURE_SHAPE = (4, 9, 45)
+    FEATURE_SHAPE = (4, 9, 48)
 
     # The features are organized as a [4,9,45] matrix, the following constants can be used to access the 45 channels
 
@@ -27,30 +32,34 @@ class FeaturesSetCppConv(FeaturesSetCpp):
 
     CH_CARDS_TRICK_CURRENT = 17
 
-    CH_HAND           = 18            # 1 Hands
-    CH_CARDS_VALID     = 19
+    CH_HANDS           = 18            # 4 Hands
+    CH_CARDS_VALID     = 22
 
-    CH_DEALER          = 20
-    CH_DECLARE_TRUMP   = 24
-    CH_PLAYER          = 28
-    CH_TRUMP           = 32            # 6 possibilities
-    CH_FOREHAND        = 38            # store forehand as one hot encoded for 3 values with -1, 0, 1
-    CH_POINTS_OWN      = 41
-    CH_POINTS_OPP      = 42
-    CH_TRUMP_VALID     = 43
-    CH_PUSH_VALID      = 44
+    CH_DEALER          = 23
+    CH_DECLARE_TRUMP   = 27
+    CH_PLAYER          = 31
+    CH_TRUMP           = 35            # 6 possibilities
+    CH_FOREHAND        = 41
+    # CH_NR_TRICKS       = 41
+    # CH_NR_CARDS_PLAYED = 42
+    CH_POINTS_OWN      = 44
+    CH_POINTS_OPP      = 45
+    CH_TRUMP_VALID     = 46
+    CH_PUSH_VALID      = 47
 
     def __init__(self):
         super().__init__()
-        self._feature_length = FeaturesSetCppConv.FEATURE_LENGTH
+        self._feature_length = FeaturesSetCppConvCheating.FEATURE_LENGTH
 
-    def convert_to_features(self, obs: jasscpp.GameObservationCpp, rule: jasscpp.RuleSchieberCpp) -> np.ndarray:
+    def convert_to_features(self, state: jasscpp.GameStateCpp, rule: jasscpp.RuleSchieberCpp) -> np.ndarray:
         """
         Convert the obs to a feature vector. For convolutional networks, the set will contain the channels
         at the end, so the format will be 36 x K (or 4 x 9 x K)
+
         Args:
-            obs : observation to convert
+            state : observation to convert
             rule: rule for calculating the valid cards
+
         """
         # convert played cards in tricks to several one hot encoded array:
         #  - who played the card (36x4)
@@ -61,11 +70,10 @@ class FeaturesSetCppConv(FeaturesSetCpp):
         cards_played_in_trick_number = np.zeros([36, 9], dtype=np.float32)
         cards_played_in_position = np.zeros([36, 4], dtype=np.float32)
 
-        # we go through the one more than the number of tricks to include the current trick
-        for trick_id in range(obs.current_trick + 1):
-            player = obs.trick_first_player[trick_id]
+        for trick_id in range(state.current_trick):
+            player = state.trick_first_player[trick_id]
             for i in range(4):
-                card = obs.tricks[trick_id, i]
+                card = state.tricks[trick_id, i]
                 if card != -1:
                     cards_played_by_player[card, player] = 1.0
                     cards_played_in_trick_number[card, trick_id] = 1.0
@@ -75,24 +83,24 @@ class FeaturesSetCppConv(FeaturesSetCpp):
 
         # cards played in the last trick, the information about the position and who played them are already present
         # in the arrays above, so we just mark the cards of the current trick
-        current_trick = np.minimum(obs.current_trick, 8)  # could be 9 for last state
-        current_trick = obs.tricks[current_trick]
+        current_trick = np.minimum(state.current_trick, 8)  # could be 9 for last state
+        current_trick = state.tricks[current_trick]
         cards_of_current_trick = np.zeros([36, 1], dtype=np.float32)
 
-        if obs.nr_cards_in_trick > 0:
+        if state.nr_cards_in_trick > 0:
             cards_of_current_trick[current_trick[0], 0] = 1.0
-        if obs.nr_cards_in_trick > 1:
+        if state.nr_cards_in_trick > 1:
             cards_of_current_trick[current_trick[1], 0] = 1.0
-        if obs.nr_cards_in_trick > 2:
+        if state.nr_cards_in_trick > 2:
             cards_of_current_trick[current_trick[2], 0] = 1.0
         # 36 elements, total 648
 
-        hand = obs.hand.astype(np.float32).reshape(-1, 1)
+        hands = state.hands.astype(np.float32).T
         # 36 elements, total 684
 
         # we use 3 planes for the valid actions, one for the cards and one for trump and one for push,
         # however we use the trump layers to the end.
-        valid_actions = rule.get_valid_cards_from_obs(obs).astype(np.float32)
+        valid_actions = np.clip(rule.get_valid_cards_from_state(state).astype(np.float32), a_min=0, a_max=1)
         valid_cards = np.zeros([36,1], dtype=np.float32)
         valid_cards[:, 0] = valid_actions[0:36]
 
@@ -100,51 +108,51 @@ class FeaturesSetCppConv(FeaturesSetCpp):
 
         # the additional information is added as planes, one-hot encoded
         dealer = np.zeros([36, 4], dtype=np.float32)
-        dealer[:, obs.dealer] = 1.0
+        dealer[:, state.dealer] = 1.0
         # 144 elements, total 864
 
         # if trump was not declared yet, we use a zero vector
         declare_trump = np.zeros([36, 4], dtype=np.float32)
-        if obs.declared_trump_player != -1:
-            declare_trump[:, obs.declared_trump_player] = 1.0
+        if state.declared_trump_player != -1:
+            declare_trump[:, state.declared_trump_player] = 1.0
         # 144 elements, total 1008
 
         # player to play
         player = np.zeros([36, 4], dtype=np.float32)
-        player[:, obs.player] = 1.0
+        player[:, state.player] = 1.0
         # 144 elements, total 1152
 
         # trump selected
         trump = np.zeros([36, 6], dtype=np.float32)
-        if obs.trump != -1:
-            trump[:, obs.trump] = 1.0
+        if state.trump != -1:
+            trump[:, state.trump] = 1.0
         # 216 elements, total 1368
 
         # store forehand as one hot encoded for 3 values with -1, 0, 1 set as the first, second or third entry
         forehand = np.zeros([36, 3], dtype=np.float32)
-        forehand[:, obs.forehand + 1] = 1.0
+        forehand[:, state.forehand + 1] = 1.0
         # 3*36 element, total 1404
 
         # we omit nr of trick and nr of cards played here
 
-        team_player = team[obs.player]
-        points_own = np.full([36, 1], fill_value=obs.points[team_player] / 157.0, dtype=np.float32)
-        points_opponent = np.full([36, 1], fill_value=obs.points[1 - team_player] / 157.0, dtype=np.float32)
+        team_player = team[state.player]
+        points_own = np.full([36, 1], fill_value=state.points[team_player] / 157.0, dtype=np.float32)
+        points_opponent = np.full([36, 1], fill_value=state.points[1 - team_player] / 157.0, dtype=np.float32)
         # 72 elements, total 1548
 
         # select trump
         trump_valid = np.zeros([36,1], dtype=np.float32)
-        if obs.trump == -1:
+        if state.trump == -1:
             trump_valid.fill(1.0)
         push_valid = np.zeros([36, 1], dtype=np.float32)
-        if obs.trump == -1 and obs.forehand == -1:
+        if state.trump == -1 and state.forehand == -1:
             push_valid.fill(1.0)
 
         features = np.concatenate([cards_played_by_player,
                                    cards_played_in_trick_number,
                                    cards_played_in_position,
                                    cards_of_current_trick,
-                                   hand,
+                                   hands,
                                    valid_cards,
                                    dealer,
                                    declare_trump,
@@ -156,7 +164,7 @@ class FeaturesSetCppConv(FeaturesSetCpp):
                                    trump_valid,
                                    push_valid], axis=1)
 
-        return np.reshape(features, FeaturesSetCppConv.FEATURE_LENGTH)
+        return np.reshape(features, FeaturesSetCppConvCheating.FEATURE_LENGTH)
 
     def decode_features(self, features_one_dim: np.ndarray) -> dict:
         """
@@ -168,7 +176,7 @@ class FeaturesSetCppConv(FeaturesSetCpp):
             Returns:
                 a dict representing the features in a more readable way for logging
         """
-        features = np.reshape(features_one_dim, FeaturesSetCppConv.FEATURE_SHAPE)
+        features = np.reshape(features_one_dim, FeaturesSetCppConvCheating.FEATURE_SHAPE)
 
         # cards played by each player
         player_0_cards = convert_one_hot_encoded_cards_to_str_encoded_list(features[:, :, self.CH_CARDS_PLAYER_0])

@@ -2,9 +2,9 @@
 import numpy as np
 from jasscpp import GameObservationCpp
 
-from jass_mu_zero.jass.agent.remembering_agent import RememberingAgent
-from jass_mu_zero.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
-from jass_mu_zero.jass.features.features_set_cpp import FeaturesSetCpp
+from jass_mu_zero.agent.agent_full_action_space import AgentFullActionSpace
+from jass_mu_zero.observation.features_cpp_conv_cheating import FeaturesSetCppConvCheating
+from jass_mu_zero.observation.features_set_cpp import FeaturesSetCpp
 from jass_mu_zero.mu_zero.mcts.latent_node_selection_policy import LatentNodeSelectionPolicy
 from jass_mu_zero.mu_zero.mcts.latent_value_calc_policy import LatentValueCalculationPolicy
 from jass_mu_zero.mu_zero.mcts.min_max_stats import MinMaxStats
@@ -12,7 +12,7 @@ from jass_mu_zero.mu_zero.mcts.tree_search import ALPV_MCTS
 from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
 
 
-class AgentMuZeroMCTS(RememberingAgent):
+class AgentMuZeroMCTS(AgentFullActionSpace):
     """
     MuZero agent to play jass with ALPV-MCTS
     """

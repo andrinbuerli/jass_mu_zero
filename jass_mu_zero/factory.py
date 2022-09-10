@@ -7,7 +7,7 @@ from jass_mu_zero.jass.agent.agent import CppAgent
 from jass_mu_zero.jass.agent.agent_by_network_cpp import AgentByNetworkCpp
 from jass_mu_zero.jass.features.features_conv_cpp import FeaturesSetCppConv
 from jass_mu_zero.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
-from jass_mu_zero.jass.features.features_set_cpp import FeaturesSetCpp
+from jass_mu_zero.observation.features_set_cpp import FeaturesSetCpp
 
 
 def get_agent(config: WorkerConfig, network, greedy=False, force_local=False) -> CppAgent:

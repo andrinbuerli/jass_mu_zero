@@ -5,35 +5,12 @@ import tensorflow as tf
 from jass.features.feature_example_buffer import parse_feature_example
 
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
-from jass_mu_zero.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
-from jass_mu_zero.metrics.base_async_metric import BaseAsyncMetric
+from jass_mu_zero.mu_zero.metrics.base_async_metric import BaseAsyncMetric
 from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
+from jass_mu_zero.observation.features_cpp_conv_cheating import FeaturesSetCppConvCheating
 
 
-def _calculate_vpkl_(current_positions, policy_estimate, x, features):
-    current_states = tf.reshape(tf.gather_nd(x, current_positions), (-1,) + features.FEATURE_SHAPE)
-    valid_cards = tf.reshape(current_states[:, :, :, features.CH_CARDS_VALID], [-1, 36])
-    trump_valid = tf.tile(
-        tf.reshape(tf.reduce_max(current_states[:, :, :, features.CH_TRUMP_VALID], axis=(1, 2)), [-1, 1]),
-        [1, 6])
-    push_valid = tf.reshape(tf.reduce_max(current_states[:, :, :, features.CH_PUSH_VALID], axis=(1, 2)),
-                            [-1, 1])
-    valid_actions = tf.concat([
-        valid_cards,
-        trump_valid,
-        push_valid
-    ], axis=-1)
-
-    valid_actions = valid_actions / tf.reduce_sum(valid_actions, axis=-1)[:, None]
-
-    policy_estimate = tf.clip_by_value(policy_estimate, 1e-7, 1. - 1e-7)
-    valid_actions = tf.clip_by_value(valid_actions, 1e-7, 1. - 1e-7)
-    kl = tf.reduce_mean(
-        tf.reduce_sum(valid_actions * tf.math.log(valid_actions / policy_estimate), axis=1)).numpy()
-    return kl
-
-
-def _calculate_batched_vpkl_(network: AbstractNetwork, iterator, n_steps_ahead, f_shape, l_shape, features):
+def _calculate_batched_spkl_(network: AbstractNetwork, iterator, n_steps_ahead, f_shape, l_shape):
     x, y = next(iterator)
 
     x = tf.reshape(x, (-1,) + f_shape)
@@ -44,43 +21,52 @@ def _calculate_batched_vpkl_(network: AbstractNetwork, iterator, n_steps_ahead, 
     position = np.random.choice(range(trajectory_length - n_steps_ahead))
     positions = np.array(list(zip(range(batch_size), np.repeat(position, batch_size))))
 
-    initial_states = tf.gather_nd(x, positions)
-    value, reward, policy_estimate, encoded_states = network.initial_inference(initial_states)
+    value, reward, policy_estimate, encoded_states = network.initial_inference(tf.gather_nd(x, positions))
+
+    supervised_policy = tf.gather_nd(y, positions)[:, :43]
+    assert all(tf.reduce_max(supervised_policy, axis=-1) == 1)
 
     min_tensor = tf.stack((tf.range(batch_size), tf.repeat(trajectory_length - 1, batch_size)), axis=1)
     zeros = tf.zeros(batch_size, dtype=tf.int32)
     current_positions = positions
-
     kls = []
-    kl = _calculate_vpkl_(current_positions, policy_estimate, x, features)
+    kl = _calculate_spkl_(policy_estimate, supervised_policy)
     kls.append(float(kl))
 
     for i in range(n_steps_ahead):
-        supervised_policy = tf.gather_nd(y, current_positions)[:, :43]
-        assert all(tf.reduce_max(supervised_policy, axis=-1) == 1), f"{tf.reduce_max(supervised_policy, axis=-1)} should match 1"
-
         actions = tf.reshape(tf.argmax(supervised_policy, axis=-1), [-1, 1])
         value, reward, policy_estimate, encoded_states =  network.recurrent_inference(encoded_states, actions)
 
         current_positions = tf.minimum(positions + [0, (i + 1)], min_tensor)  # repeat last action at end
+
         supervised_policy = tf.gather_nd(y, current_positions)[:, :43]
         # solve if trajectory hans only length of 37
         current_positions = current_positions - tf.stack((zeros, tf.cast(tf.reduce_sum(supervised_policy, axis=-1) == 0, tf.int32)), axis=1)
 
-        kl = _calculate_vpkl_(current_positions, policy_estimate, x, features)
+        supervised_policy = tf.gather_nd(y, current_positions)[:, :43]
+        assert all(tf.reduce_max(supervised_policy, axis=-1) == 1)
+
+        kl = _calculate_spkl_(policy_estimate, supervised_policy)
         kls.append(float(kl))
 
     return {
-        f"VPKL/vpkl_{i}_steps_ahead": x for i, x in enumerate(kls)
+        f"SPKL/spkl_{i}_steps_ahead": x for i, x in enumerate(kls)
     }
 
 
-class VPKL(BaseAsyncMetric):
+def _calculate_spkl_(policy_estimate, supervised_policy):
+    policy_estimate = tf.clip_by_value(policy_estimate, 1e-7, 1. - 1e-7)
+    supervised_policy = tf.clip_by_value(supervised_policy, 1e-7, 1. - 1e-7)
+    kl = tf.reduce_mean(
+        tf.reduce_sum(supervised_policy * tf.math.log(supervised_policy / policy_estimate), axis=1)).numpy()
+    return kl
+
+
+class SPKL(BaseAsyncMetric):
 
     def get_params(self, thread_nr: int, network: AbstractNetwork, init_vars=None) -> []:
         iterator = init_vars
-        return network, iterator, self.n_steps_ahead, self.trajectory_feature_shape, \
-               self.trajectory_label_shape, self.worker_config.network.feature_extractor
+        return network, iterator, self.n_steps_ahead, self.trajectory_feature_shape, self.trajectory_label_shape
 
     def init_dataset(self):
         ds = tf.data.TFRecordDataset(self.tf_record_files)
@@ -106,8 +92,7 @@ class VPKL(BaseAsyncMetric):
         self.trajectory_length = trajectory_length
         if tf_record_files is None:
             tf_record_files = [str(x.resolve()) for x in
-                               (Path(__file__).parent.parent.parent / "resources" / "supervised_data").glob(
-                                   file_ending)]
+                               (Path(__file__).parent.parent.parent / "resources" / "supervised_data").glob(file_ending)]
 
         self.n_steps_ahead = n_steps_ahead
         self.samples_per_calculation = samples_per_calculation
@@ -120,7 +105,7 @@ class VPKL(BaseAsyncMetric):
         self.trajectory_label_shape = (self.trajectory_length, label_length)
 
         super().__init__(worker_config, network_path, parallel_threads=1,
-                         metric_method=_calculate_batched_vpkl_, init_method=self.init_dataset)
+                         metric_method=_calculate_batched_spkl_, init_method=self.init_dataset)
 
     def get_name(self):
-        return f"vpkl"
+        return f"spkl"

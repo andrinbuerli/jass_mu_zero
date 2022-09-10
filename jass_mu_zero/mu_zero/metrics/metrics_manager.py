@@ -1,4 +1,4 @@
-from jass_mu_zero.metrics.base_async_metric import BaseAsyncMetric
+from jass_mu_zero.mu_zero.metrics.base_async_metric import BaseAsyncMetric
 
 
 class MetricsManager:

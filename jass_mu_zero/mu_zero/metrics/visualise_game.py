@@ -8,10 +8,10 @@ from jass.features.feature_example_buffer import parse_feature_example
 from matplotlib import pyplot as plt
 
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
-from jass_mu_zero.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
-from jass_mu_zero.metrics.base_async_metric import BaseAsyncMetric
+from jass_mu_zero.mu_zero.metrics.base_async_metric import BaseAsyncMetric
 from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
 from jass_mu_zero.mu_zero.network.support_conversion import support_to_scalar
+from jass_mu_zero.observation.features_cpp_conv_cheating import FeaturesSetCppConvCheating
 
 
 def clear_all_matplotlib_cache():

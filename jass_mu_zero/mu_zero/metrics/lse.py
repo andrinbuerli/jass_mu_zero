@@ -5,9 +5,9 @@ import tensorflow as tf
 from jass.features.feature_example_buffer import parse_feature_example
 
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
-from jass_mu_zero.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
-from jass_mu_zero.metrics.base_async_metric import BaseAsyncMetric
+from jass_mu_zero.mu_zero.metrics.base_async_metric import BaseAsyncMetric
 from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
+from jass_mu_zero.observation.features_cpp_conv_cheating import FeaturesSetCppConvCheating
 
 
 def _calculate_LSE_(batch_size, encoded_states):
@@ -65,6 +65,7 @@ def _calculate_batched_lse_(network: AbstractNetwork, iterator, n_steps_ahead, f
     return {
         f"SLSE/lse_{i}_steps_ahead": x for i, x in enumerate(lses)
     }
+
 
 class LSE(BaseAsyncMetric):
 

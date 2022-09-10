@@ -2,13 +2,12 @@ import jasscpp
 import numpy as np
 from jasscpp import GameObservationCpp
 
-from jass_mu_zero.jass.agent.remembering_agent import RememberingAgent
-from jass_mu_zero.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
-from jass_mu_zero.jass.features.features_set_cpp import FeaturesSetCpp
+from jass_mu_zero.agent.agent_full_action_space import AgentFullActionSpace
+from jass_mu_zero.observation.features_set_cpp import FeaturesSetCpp
 from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
 
 
-class AgentPolicy(RememberingAgent):
+class AgentPolicy(AgentFullActionSpace):
     """
     Local policy agent to play the Schieber jass
     """

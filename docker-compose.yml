@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-    trainer:
+    mu_zero:
         build:
           context: .
           network: "host"
@@ -8,7 +8,6 @@ services:
             - .:/app
         ports:
           - 8080:8080
-        command: sjmz --train /app/resources/experiments/experiment-1.json
         deploy:
           resources:
             reservations:
@@ -16,37 +15,6 @@ services:
                 - driver: nvidia
                   device_ids: ['0']
                   capabilities: [gpu]
-
-    evaluate:
-      build:
-        context: .
-      network_mode: "host"
-      volumes:
-        - .:/app
-      command: sjmz --evaluate /app/resources/evaluation/experiment-1
-      deploy:
-        resources:
-          reservations:
-            devices:
-              - driver: nvidia
-                device_ids: ['0']
-                capabilities: [gpu]
-
-    baselines:
-        build: .
-        ports:
-          - 9899:9899
-          - 9898:9898
-          - 9896:9896
-          - 9895:9895
-          - 9894:9894
-          - 9893:9893
-        volumes:
-            - .:/app
-        command: bash er notebook
-                  cd scripts
-                  && python host_agents.py --files 
-                  mcts.json dmcts.json random.json dmcts-50.json dmcts-large.json mcts-large.json"
 
     test:
         build:
@@ -57,14 +25,6 @@ services:
         entrypoint: []
         volumes:
             - .:/app
-            - ../jass-train-py/data/conv_observation_full_0.75_quantile:/data
         command: pytest --forked -n auto --timeout=120 /app/test -v
-        deploy:
-          resources:
-            reservations:
-              devices:
-                - driver: nvidia
-                  device_ids: [ '0' ]
-                  capabilities: [ gpu ]
 
 

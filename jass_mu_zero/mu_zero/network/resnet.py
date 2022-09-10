@@ -8,8 +8,8 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers
 
-from jass_mu_zero.jass.features.features_conv_cpp import FeaturesSetCppConv
 from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
+from jass_mu_zero.observation.features_conv_cpp import FeaturesSetCppConv
 
 
 class MuZeroResidualNetwork(AbstractNetwork):

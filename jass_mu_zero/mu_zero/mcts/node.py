@@ -2,8 +2,6 @@ from threading import Lock
 
 import numpy as np
 
-from jass_mu_zero.mu_zero.mcts.min_max_stats import MinMaxStats
-
 
 class Node:
     def __init__(self, parent: 'Node' or None,

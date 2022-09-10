@@ -19,9 +19,8 @@ from flask import request, jsonify, Blueprint, current_app
 from jass.game.const import card_strings
 from jass.game.game_observation import GameObservation
 from jass.game.game_state import GameState
-from jassmlcpp.agent import JassAgentCheatingCpp
 
-from jass_mu_zero.jass.agent.agent_from_cpp_cheating import AgentFromCppCheating
+from jass_mu_zero.agent.agent_from_cpp_cheating import AgentFromCppCheating
 
 JASS_PATH_PREFIX = '/jass/players/'
 SELECT_TRUMP_PATH_PREFIX = '/action_trump'

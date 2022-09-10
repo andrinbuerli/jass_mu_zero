@@ -10,6 +10,9 @@ from pathlib import Path
 from threading import Thread
 
 import tqdm
+from jass.game.const import team
+
+from jass_mu_zero.environment.multi_player_game import MultiPlayerGame
 
 mp.set_start_method('spawn', force=True)
 
@@ -17,8 +20,6 @@ sys.path.append('../../')
 
 import numpy as np
 import itertools
-
-from jass_mu_zero.jass.arena.arena import Arena
 
 from jass_mu_zero.factory import get_agent, get_network, get_features
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
@@ -39,15 +40,20 @@ def _play_games_(n_games_to_play, general_config, agent1_config, agent2_config, 
 
     rng = range(n_games_to_play)
     for _ in rng:
-        arena = Arena(
-            nr_games_to_play=1, cheating_mode=general_config["information"] != "imperfect",
-            check_move_validity=True, reset_agents=True,
-            store_trajectory=False)
-        arena.set_players(agent1, agent2, agent1, agent2)
-        arena.play_game(dealer=np.random.choice([0, 1, 2, 3]))
+        game = MultiPlayerGame(env=SchieberJassMultiAgentEnv(observation_builder=lambda x: x))
 
-        total = arena.points_team_0 + arena.points_team_1
-        result = (arena.points_team_0 / total, arena.points_team_1 / total)
+        first_team = np.random.choice([True, False])
+        if first_team:
+            _, rewards, _, _, _ = game.play_rounds(get_agent=lambda key: {0: agent1, 1: agent2}[team[key]], n=4)
+
+            points = np.array([np.cumsum(rewards[0]), np.cumsum(rewards[1])])
+            result = np.mean(points[0] / points.sum())
+        else:
+            _, rewards, _, _, _ = game.play_rounds(get_agent=lambda key: {1: agent1, 0: agent2}[team[key]], n=4)
+
+            points = np.array([np.cumsum(rewards[0]), np.cumsum(rewards[1])])
+            result = np.mean(points[1] / points.sum())
+
         queue.put(result)
 
     del agent1, agent2
@@ -189,47 +195,48 @@ def _evaluate_(
 
     logging.info(f"finished {agent1_config['note']}-vs-{agent2_config['note']}")
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog='Evaluate multiple agents')
-    parser.add_argument(f'--max_parallel_evaluations', default=1, type=int, help="Number of max parallel evaluations")
-    parser.add_argument(f'--max_parallel_processes_per_evaluation', default=1, type=int, help="Number of max parallel processes per evaluation")
-    parser.add_argument(f'--max_parallel_threads_per_evaluation_process', default=1, type=int, help="Number of max parallel threads per process per evaluation")
-    parser.add_argument(f'--no_skip_on_result_file', default=False, action="store_true", help="Skip evaluation if there exists a corresponding result file")
-    parser.add_argument(f'--files', nargs="+", default=["mu_zero/experiment-0/dmcts.json"], help="Filenames of evaluations to be executed (relative to folder resources/evaluation)")
-    parser.add_argument(f'--all', default=False, action="store_true", help="run all evaluations from resources/evaluation")
-    parser.add_argument(f'--folder', default="results", help="Folder to store evaluation results (relative to this script file)")
-    args = parser.parse_args()
 
-    base_path = Path(__file__).resolve().parent.parent.parent / "resources" / "evaluation"
+class MuZeroEvaluatorCLI:
+    @staticmethod
+    def setup_args(parser):
+        parser.add_argument(f'--max_parallel_evaluations', default=1, type=int, help="Number of max parallel evaluations")
+        parser.add_argument(f'--max_parallel_processes_per_evaluation', default=1, type=int, help="Number of max parallel processes per evaluation")
+        parser.add_argument(f'--max_parallel_threads_per_evaluation_process', default=1, type=int, help="Number of max parallel threads per process per evaluation")
+        parser.add_argument(f'--no_skip_on_result_file', default=False, action="store_true", help="Skip evaluation if there exists a corresponding result file")
+        parser.add_argument(f'--files', nargs="+", default=["mu_zero/experiment-0/dmcts.json"], help="Filenames of evaluations to be executed (relative to folder resources/evaluation)")
+        parser.add_argument(f'--all', default=False, action="store_true", help="run all evaluations from resources/evaluation")
+        parser.add_argument(f'--folder', default="results", help="Folder to store evaluation results (relative to this script file)")
 
-    if args.all:
-        files = list(base_path.glob("**/*.json"))
-    else:
-        files = [base_path / file for file in args.files]
+    @staticmethod
+    def run(args):
+        base_path = Path(__file__).resolve().parent.parent.parent / "resources" / "evaluation"
 
+        if args.all:
+            files = list(base_path.glob("**/*.json"))
+        else:
+            files = [base_path / file for file in args.files]
 
-    for path in files:
-        with open(path, "r") as f:
-            config = json.load(f)
+        for path in files:
+            with open(path, "r") as f:
+                config = json.load(f)
 
-        (Path(__file__).resolve().parent / args.folder).mkdir(parents=True, exist_ok=True)
+            (Path(__file__).resolve().parent / args.folder).mkdir(parents=True, exist_ok=True)
 
-        processes = []
-        for comb in list(itertools.combinations(config["agents"], r=2)):
-            p = Process(target=_evaluate_, args=(
-                config, *comb,
-                not args.no_skip_on_result_file,
-                args.max_parallel_processes_per_evaluation,
-                args.max_parallel_threads_per_evaluation_process,
-                args.folder))
-            processes.append(p)
-            p.start()
+            processes = []
+            for comb in list(itertools.combinations(config["agents"], r=2)):
+                p = Process(target=_evaluate_, args=(
+                    config, *comb,
+                    not args.no_skip_on_result_file,
+                    args.max_parallel_processes_per_evaluation,
+                    args.max_parallel_threads_per_evaluation_process,
+                    args.folder))
+                processes.append(p)
+                p.start()
 
-            nr_running_processes = len([x for x in processes if x.is_alive()])
-            while 0 < args.max_parallel_evaluations <= nr_running_processes:
-                time.sleep(1)
                 nr_running_processes = len([x for x in processes if x.is_alive()])
-                # logging.info(f"{nr_running_processes} running processes, waiting to finish...")
+                while 0 < args.max_parallel_evaluations <= nr_running_processes:
+                    time.sleep(1)
+                    nr_running_processes = len([x for x in processes if x.is_alive()])
 
-        [x.join() for x in processes]
+            [x.join() for x in processes]
 

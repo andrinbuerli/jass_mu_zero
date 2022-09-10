@@ -2,33 +2,32 @@ import gc
 from copy import deepcopy
 
 import numpy as np
+from jass.game.const import team
 
+from jass_mu_zero.agent.agent import CppAgent
+from jass_mu_zero.environment.multi_player_game import MultiPlayerGame
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
 from jass_mu_zero.factory import get_agent, get_opponent
-from jass_mu_zero.jass.agent.agent import CppAgent
-from jass_mu_zero.jass.arena.arena import Arena
-from jass_mu_zero.metrics.base_async_metric import BaseAsyncMetric
+from jass_mu_zero.mu_zero.metrics.base_async_metric import BaseAsyncMetric
 from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
 
 
 def _play_single_game_(i, agent: CppAgent, opponent: CppAgent):
-    arena = Arena(nr_games_to_play=4, cheating_mode=False, check_move_validity=True, reset_agents=True)
-
     first_team = np.random.choice([True, False])
 
+    game = MultiPlayerGame(env=SchieberJassMultiAgentEnv(observation_builder=lambda x: x))
     if first_team:
-        arena.set_players(agent, opponent, agent, opponent)
-        arena.play_all_games()
+        _, rewards, _, _, _ = game.play_rounds(get_agent=lambda key: {0: agent, 1: opponent}[team[key]], n=4)
 
-        points = np.mean(arena.points_team_0 / (arena.points_team_0 + arena.points_team_1))
+        points = np.array([np.cumsum(rewards[0]), np.cumsum(rewards[1])])
+        points = np.mean(points[0] / points.sum())
     else:
-        arena.set_players(opponent, agent, opponent, agent)
-        arena.play_all_games()
+        _, rewards, _, _, _ = game.play_rounds(get_agent=lambda key: {1: agent, 0: opponent}[team[key]], n=4)
 
-        points = np.mean(arena.points_team_1 / (arena.points_team_0 + arena.points_team_1))
+        points = np.array([np.cumsum(rewards[0]), np.cumsum(rewards[1])])
+        points = np.mean(points[1] / points.sum())
 
-
-    del arena, agent, opponent
+    del game, agent, opponent
     gc.collect()
 
     return points

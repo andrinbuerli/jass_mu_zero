@@ -31,25 +31,23 @@ RUN wget https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-g
 RUN tar -C /usr/local -xzf libtensorflow-gpu-linux-x86_64-2.6.0.tar.gz
 RUN rm libtensorflow-gpu*
 
-COPY .github .github
-
-RUN pip install --upgrade pip
-RUN pip install --upgrade pip pip install --upgrade setuptools
-
 COPY . /app/
 WORKDIR /app
 
-RUN pip install -v -e .
+# add user
+RUN chown -hR 1000 /app
+RUN chown -hR 1000 /usr
+RUN adduser user --uid 1000
+RUN adduser user sudo
+USER user
 
-# install latex for plots and dev requirements
-RUN if [[ -z "$DEV" ]];\
-    then echo "No DEV mode";\
-    else ln -snf /usr/share/zoneinfo/Etc/UTC /etc/localtime \
-    && echo "Etc/UTC" > /etc/timezone \
-    && apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install texlive-full -y \
-    && rm -rf /var/lib/apt/lists/*; fi
+RUN pip install --upgrade pip
+#RUN pip install --upgrade setuptools
+
+RUN git config --global --add safe.directory /app
+
+RUN pip install -r requirements.txt
+RUN pip install -v -e .
 
 RUN if [[ -z "$DEV" ]];\
     then echo "No DEV mode";\
@@ -59,14 +57,6 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 WORKDIR /app
-
-# add user
-
-RUN chown -hR 1000 /repos
-
-RUN adduser user --uid 1000
-RUN adduser user sudo
-USER user
 
 ENV XLA_PYTHON_CLIENT_MEM_FRACTION=.7
 

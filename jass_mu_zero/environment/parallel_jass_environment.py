@@ -17,61 +17,44 @@ from jass.features.labels_action_full import LabelSetActionFull
 from jass.game.const import TRUMP_FULL_OFFSET, TRUMP_FULL_P
 from jasscpp import RuleSchieberCpp
 
+from jass_mu_zero.agent.agent_full_action_space import AgentFullActionSpace
+from jass_mu_zero.environment.multi_player_game import MultiPlayerGame
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
 from jass_mu_zero.factory import get_agent, get_network
-from jass_mu_zero.jass.arena.arena import Arena
 
 
-def _single_self_play_game_(i, agent):
+def _single_self_play_game_(i, agent: AgentFullActionSpace):
     state_features, check_move_validity = _single_self_play_game_.feature_extractor, _single_self_play_game_.check_move_validity
 
-    arena = Arena(
-        nr_games_to_play=1, cheating_mode=False, check_move_validity=check_move_validity,
-        store_trajectory=True, feature_extractor=state_features, store_trajectory_inc_raw_game_state=False)
-    arena.set_players(agent, agent, agent, agent)  # self-play setting!
-    arena.play_game(dealer=np.random.choice([0, 1, 2, 3]))
+    game = MultiPlayerGame(env=SchieberJassMultiAgentEnv(observation_builder=state_features))
+    observations, rewards, actions, action_probs, action_values = game.play_round(get_agent=lambda key: agent)
 
-    trump_probs, card_probs = agent.get_stored_probs()
-    values = agent.get_stored_values()
+    action_probs = np.stack(action_probs)
+    action_values = np.stack(action_values)
 
-    states, actions, rewards, outcomes = arena.get_trajectory()
-
-    assert (rewards.sum(axis=0) == outcomes).all()
-
-    probs = np.stack(trump_probs + card_probs)
-    values = np.stack(values)
-
-    if len(states) == 37:  # pad if no push
-        states = np.concatenate((states, np.zeros_like(states[-1])[None]), axis=0)
+    if len(observations) == 37:  # pad if no push
+        observations = np.concatenate((observations, np.zeros_like(observations[-1])[None]), axis=0)
         actions = np.concatenate((actions, np.zeros_like(actions[-1])[None]), axis=0)
         rewards = np.concatenate((rewards, np.zeros_like(rewards[-1])[None]), axis=0)
-        probs = np.concatenate((probs, np.zeros_like(probs[-1])[None]), axis=0)
-        outcomes = np.concatenate((outcomes, np.zeros_like(outcomes[-1])[None]), axis=0)
-        values = np.concatenate((values, np.zeros_like(values[-1])[None]), axis=0)
+        action_probs = np.concatenate((action_probs, np.zeros_like(action_probs[-1])[None]), axis=0)
+        action_values = np.concatenate((action_values, np.zeros_like(action_values[-1])[None]), axis=0)
 
-    assert len(probs) == len(states), "Inconsistent game states and actions"
+    assert len(action_probs) == len(observations), "Inconsistent game states and actions"
 
     assert rewards.sum() == 157, "Invalid cumulative reward"
 
-    assert np.array(probs[0]).argmax() >= TRUMP_FULL_OFFSET, "Fist action of game must be trump selection or PUSH"
+    assert np.array(action_probs[0]).argmax() >= TRUMP_FULL_OFFSET, "Fist action of game must be trump selection or PUSH"
 
-    if np.array(probs[0]).argmax() == TRUMP_FULL_P and np.array(probs[1]).argmax() < TRUMP_FULL_OFFSET:
+    if np.array(action_probs[0]).argmax() == TRUMP_FULL_P and np.array(action_probs[1]).argmax() < TRUMP_FULL_OFFSET:
         logging.warning("WARNING: Action after PUSH must be a trump selection"
                         "!!!!! THIS IS AN ERROR IF SAMPLING STRATEGY IS SUPPOSED TO BE GREEDY !!!!")
 
-    # validate outcomes
-    for s in range(outcomes.shape[0] - 1):
-        assert all(outcomes[s] == outcomes[s + 1]) or outcomes[s + 1].sum() == 0, "Outcomes of do not match"
+    logging.info(f"finished single game {i}, cached positions: {len(observations)}")
 
-    agent.reset()
-    arena.reset()
-
-    logging.info(f"finished single game {i}, cached positions: {len(states)}")
-
-    del arena, agent
+    del game, agent
     gc.collect()
 
-    return states, actions, rewards, probs, values
+    return observations, actions, rewards, action_probs, action_values
 
 
 def _init_thread_worker_(function, feature_extractor, check_move_validity):

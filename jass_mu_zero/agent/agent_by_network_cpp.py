@@ -1,6 +1,6 @@
 from jasscpp import GameObservationCpp
 
-from jass_mu_zero.jass.agent.agent_by_network import AgentByNetwork
+from jass_mu_zero.agent.agent_by_network import AgentByNetwork
 from jass_mu_zero.util import convert_to_python_game_observation, convert_to_python_game_state
 
 

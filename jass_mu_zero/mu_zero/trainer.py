@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
 from jass_mu_zero.log.base_logger import BaseLogger
-from jass_mu_zero.metrics.metrics_manager import MetricsManager
+from jass_mu_zero.mu_zero.metrics.metrics_manager import MetricsManager
 from jass_mu_zero.mu_zero.network.network_base import AbstractNetwork
 from jass_mu_zero.mu_zero.network.support_conversion import scalar_to_support, support_to_scalar_per_player
 from jass_mu_zero.mu_zero.replay_buffer.file_based_replay_buffer_from_folder import FileBasedReplayBufferFromFolder
