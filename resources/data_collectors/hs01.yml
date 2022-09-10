@@ -4,10 +4,9 @@ services:
         build: ../../
         volumes:
             - ../../:/app
-            - ../../../jass-train-py/data/conv_observation_full_0.75_quantile:/data
         network_mode: host
         command: >
-            bash -c "cd scripts && python collect_n_send_game_data.py
+            bash -c "sjmz --nodocker --collect
             --host http://10.180.39.13
             --max_parallel_processes 10
             --max_parallel_threads 2

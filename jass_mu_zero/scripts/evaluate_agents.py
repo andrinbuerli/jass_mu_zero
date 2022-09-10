@@ -196,7 +196,7 @@ def _evaluate_(
     logging.info(f"finished {agent1_config['note']}-vs-{agent2_config['note']}")
 
 
-class MuZeroEvaluatorCLI:
+class MuZeroEvaluationCLI:
     @staticmethod
     def setup_args(parser):
         parser.add_argument(f'--max_parallel_evaluations', default=1, type=int, help="Number of max parallel evaluations")

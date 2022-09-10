@@ -41,18 +41,21 @@ def host_agent(config: WorkerConfig):
     app.run(host="0.0.0.0", port=config.agent.port)
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog="host agents")
-    parser.add_argument(f'--files', nargs='+', default=[])
-    args = parser.parse_args()
+class HostAgentsCLI:
 
-    processes = []
-    base_path = Path(__file__).resolve().parent.parent / "resources" / "baselines"
+    @staticmethod
+    def setup_args(parser):
+        parser.add_argument(f'--files', nargs='+', default=[])
 
-    for agent_str in args.files:
-        config = WorkerConfig()
-        config.load_from_json(base_path / agent_str)
-        p = Process(target=host_agent, args=[config])
-        p.start()
+    @staticmethod
+    def run(args):
+        processes = []
+        base_path = Path(__file__).resolve().parent.parent / "resources" / "baselines"
 
-    [p.join() for p in processes]
+        for agent_str in args.files:
+            config = WorkerConfig()
+            config.load_from_json(base_path / agent_str)
+            p = Process(target=host_agent, args=[config])
+            p.start()
+
+        [p.join() for p in processes]

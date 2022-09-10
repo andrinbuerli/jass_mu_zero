@@ -11,7 +11,4 @@ services:
           - 9893:9893
         volumes:
             - .:/app
-        command: bash er notebook
-                  cd jass_mu_zero/scripts
-                  && python host_agents.py --files 
-                  mcts.json dmcts.json random.json dmcts-50.json dmcts-large.json mcts-large.json"
+        command: sjmz --files mcts.json dmcts.json random.json dmcts-50.json dmcts-large.json mcts-large.json

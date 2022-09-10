@@ -46,6 +46,7 @@ class MuZeroDataCollectionCLI:
 
         parallel_processes = (nr_cpus + 1) if nr_gpus <= 1 else (nr_cpus // 2 + 1)
         parser.add_argument(f'--host', default="http://192.168.1.107")
+        parser.add_argument(f'--machine', default="")
         parser.add_argument(f'--port', default=8080)
         parser.add_argument(f'--max_parallel_processes', default=parallel_processes)
         parser.add_argument(f'--max_parallel_threads', default=1)
