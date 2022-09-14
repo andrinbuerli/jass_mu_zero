@@ -1,25 +1,24 @@
 # MuZero for Jass
 MuZero is a model based reinforcement learning method using deep learning and therefore requires training.
 The data is generated either through self-play or reanalysing existing data (tfrecord format as described in [jass-ml-py](https://github.com/thomas-koller/jass-ml-py/tree/master/jass/features) repo.
-All MuZero specific code can be found at `lib/mu_zero`.
 
 ## Setup
-Build all the docker images using docker-compose
+Install the package
 
 ```bash
-$ docker-compose build
+$ pip install -v -e .
 ```
 
-Afterwards run all tests to verify local setup
+Run tests to verify local setup
 
 ```bash
-$ docker-compose up test
+$ sjmz (--nodocker) --test
 ```
 
 And finally start the container hosting the baselines with
 
 ```bash
-$ docker-compose up -d baselines
+$ sjmz --baselines
 ```
 
 ## Training
@@ -32,25 +31,25 @@ If this would not be the case, the IP in the files must be adapted.
 To start the training process first run 
 
 ```bash
-$ docker-compose up trainer
+$ sjmz --attach train --file resources/experiments/experiment-1 
 ```
 
 and wait until the flask server started hosting. Then start the data collectors on the respective machines
 
+
 ```bash
-$ docker-compose -f resources/data_collectors/(gpu03|e01|...).yml up
+$ sjmz collect --machine (gpu03|e01|...)
 ```
 
-The collectors should then register them on the master container and start to collect data.
+available configurations are stored at `resources/data_collectors`. The collectors should then register them on the master container and start to collect data.
 Once the replay buffer has been filled, the optimization procedure will start and the corresponding metrics will
 be logged to wandb.ai at the configured location.
-All settings and hyperparameters can be configured in the file `scripts/settings.json` 
 
 
 #Evaluate
 To evaluate run
 ```bash
-$ docker-compose up evaluate
+$ sjmz eval --files $(find -printf "%P " resources/evaluation/experiment-1/*)
 ```
 which will take quite a long time.
 The evaluation script also offers the option to run only specific evaluations among other arguments.
