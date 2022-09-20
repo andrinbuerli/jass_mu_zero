@@ -49,5 +49,5 @@ be logged to wandb.ai at the configured location.
 # Evaluate
 To evaluate run
 ```bash
-$ sjmz eval --files experiment-1/dmcts.json
+$ sjmz eval --files experiment-1/dmcts.json experiment-1/policy-B.json
 ```
