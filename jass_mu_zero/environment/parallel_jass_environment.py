@@ -15,7 +15,6 @@ import numpy as np
 from jass.features.feature_example_buffer import parse_feature_example
 from jass.features.labels_action_full import LabelSetActionFull
 from jass.game.const import TRUMP_FULL_OFFSET, TRUMP_FULL_P
-from jass_gym.jass_single_agent_env import SchieberJassSingleAgentEnv
 from jasscpp import RuleSchieberCpp
 
 from jass_mu_zero.agent.agent_full_action_space import AgentFullActionSpace
@@ -28,6 +27,7 @@ from jass_mu_zero.observation.identity_observation_builder import IdentityObserv
 def _single_self_play_game_(i, agent: AgentFullActionSpace):
     state_features = _single_self_play_game_.feature_extractor
 
+    from jass_gym.env.jass_single_agent_env import SchieberJassSingleAgentEnv
     game = MultiPlayerGame(env=SchieberJassSingleAgentEnv(observation_builder=IdentityObservationBuilder()))
     observations, rewards, actions, action_probs, action_values = game.play_rounds(get_agent=lambda key: agent)
 

@@ -1,5 +1,5 @@
 import jasscpp
-from jass_gym.conv_observation_builder import ObservationBuilder
+from jass_gym.observation.conv_observation_builder import ObservationBuilder
 
 
 class IdentityObservationBuilder(ObservationBuilder):

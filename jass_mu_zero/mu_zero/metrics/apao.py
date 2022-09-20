@@ -14,7 +14,7 @@ from jass_mu_zero.observation.identity_observation_builder import IdentityObserv
 
 
 def _play_single_game_(i, agent: CppAgent, opponent: CppAgent):
-    from jass_gym.jass_single_agent_env import SchieberJassSingleAgentEnv
+    from jass_gym.env.jass_single_agent_env import SchieberJassSingleAgentEnv
     first_team = np.random.choice([True, False])
 
     game = MultiPlayerGame(env=SchieberJassSingleAgentEnv(observation_builder=IdentityObservationBuilder()))
