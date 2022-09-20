@@ -30,7 +30,7 @@ def _play_games_(n_games_to_play, agent1_config, agent2_config, network1, networ
 
     rng = range(n_games_to_play)
     for _ in rng:
-        from jass_gym.jass_single_agent_env import SchieberJassSingleAgentEnv
+        from jass_gym.env.jass_single_agent_env import SchieberJassSingleAgentEnv
         from jass_mu_zero.environment.multi_player_game import MultiPlayerGame
         from jass_mu_zero.observation.identity_observation_builder import IdentityObservationBuilder
 

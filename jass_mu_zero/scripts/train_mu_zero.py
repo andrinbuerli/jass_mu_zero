@@ -31,7 +31,7 @@ from jass_mu_zero.mu_zero.trainer import MuZeroTrainer
 class MuZeroTrainingCLI:
     @staticmethod
     def setup_args(parser: argparse.ArgumentParser):
-        parser.add_argument(f'--settings', default="settings.json")
+        parser.add_argument(f'--file', default="settings.json")
         parser.add_argument(f'--log', default=False, action="store_true")
         parser.add_argument(f'--eager', default=False, action="store_true")
 
@@ -41,11 +41,14 @@ class MuZeroTrainingCLI:
             tf.config.experimental_run_functions_eagerly(True)
 
         worker_config = WorkerConfig()
-        worker_config.load_from_json(args.settings)
+        file_path = Path(__file__).parent.parent.parent / "resources" / args.file
+        logging.info(f"Loading experiment from file {file_path}..")
+        worker_config.load_from_json(str(file_path))
 
         pprint(worker_config.to_json())
 
         data_path = Path(worker_config.optimization.data_folder).resolve() / f"{worker_config.timestamp}"
+        logging.info(f"creating result directory at {data_path}")
         data_path.mkdir(parents=True, exist_ok=True)
         worker_config.save_to_json(data_path / "worker_config.json")
 
@@ -102,7 +105,6 @@ class MuZeroTrainingCLI:
             APAO("dmcts", worker_config, str(network_path), parallel_threads=worker_config.optimization.apa_n_games),
             APAO("dmcts", worker_config, str(network_path), parallel_threads=worker_config.optimization.apa_n_games,
                  only_policy=True),
-            APAO("dpolicy", worker_config, str(network_path), parallel_threads=worker_config.optimization.apa_n_games),
             APAO("random", worker_config, str(network_path), parallel_threads=worker_config.optimization.apa_n_games),
             SARE(
                 samples_per_calculation=worker_config.optimization.batch_size,
@@ -127,13 +129,13 @@ class MuZeroTrainingCLI:
                 network_path=str(network_path),
                 n_steps_ahead=worker_config.optimization.log_n_steps_ahead
             ),
-            VPKL(
-                samples_per_calculation=worker_config.optimization.batch_size,
-                label_length=LabelSetActionFull.LABEL_LENGTH,
-                worker_config=worker_config,
-                network_path=str(network_path),
-                n_steps_ahead=worker_config.optimization.log_n_steps_ahead
-            ),
+            # VPKL(
+            #     samples_per_calculation=worker_config.optimization.batch_size,
+            #     label_length=LabelSetActionFull.LABEL_LENGTH,
+            #     worker_config=worker_config,
+            #     network_path=str(network_path),
+            #     n_steps_ahead=worker_config.optimization.log_n_steps_ahead
+            # ),
             LSE(
                 samples_per_calculation=worker_config.optimization.batch_size,
                 label_length=LabelSetActionFull.LABEL_LENGTH,
