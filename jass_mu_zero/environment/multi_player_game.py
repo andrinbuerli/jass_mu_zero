@@ -4,7 +4,6 @@ from typing import Callable
 import gym
 import jasscpp
 import numpy as np
-from jass.game.const import team
 
 from jass_mu_zero.agent.agent_full_action_space import AgentFullActionSpace
 
@@ -46,9 +45,3 @@ class MultiPlayerGame:
 
         return np.array(observations), np.array(rewards), np.array(actions), \
                np.array(action_probs), np.array(action_values)
-
-    @staticmethod
-    def _flatten_chronologically(data: dict, timesteps: list) -> list:
-        flat = [y for x in data.values() for y in x]
-        data = map(lambda x: x[1], sorted(zip(timesteps, flat), key=lambda x: x[0]))
-        return list(data)
