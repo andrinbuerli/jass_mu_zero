@@ -1,4 +1,3 @@
-import argparse
 import gc
 import json
 import logging
@@ -12,8 +11,6 @@ from threading import Thread
 import tqdm
 from jass.game.const import team
 
-from jass_mu_zero.environment.multi_player_game import MultiPlayerGame
-
 mp.set_start_method('spawn', force=True)
 
 sys.path.append('../../')
@@ -21,10 +18,11 @@ sys.path.append('../../')
 import numpy as np
 import itertools
 
-from jass_mu_zero.factory import get_agent, get_network, get_features
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
 
-def _play_games_(n_games_to_play, general_config, agent1_config, agent2_config, network1, network2, queue):
+
+def _play_games_(n_games_to_play, agent1_config, agent2_config, network1, network2, queue):
+    from jass_mu_zero.factory import get_agent
     agent1 = get_agent(agent1_config, network1,
                        greedy=agent1_config.agent.greedy if hasattr(agent1_config.agent, "greedy") else False)
     agent2 = get_agent(agent2_config, network2,
@@ -32,19 +30,22 @@ def _play_games_(n_games_to_play, general_config, agent1_config, agent2_config, 
 
     rng = range(n_games_to_play)
     for _ in rng:
-        game = MultiPlayerGame(env=SchieberJassMultiAgentEnv(observation_builder=lambda x: x))
+        from jass_gym.jass_single_agent_env import SchieberJassSingleAgentEnv
+        from jass_mu_zero.environment.multi_player_game import MultiPlayerGame
+        from jass_mu_zero.observation.identity_observation_builder import IdentityObservationBuilder
 
-        first_team = np.random.choice([True, False])
+        game = MultiPlayerGame(env=SchieberJassSingleAgentEnv(observation_builder=IdentityObservationBuilder()))
+
+        first_team = True # np.random.choice([True, False])
+
         if first_team:
-            _, rewards, _, _, _ = game.play_rounds(get_agent=lambda key: {0: agent1, 1: agent2}[team[key]], n=4)
-
-            points = np.array([np.cumsum(rewards[0]), np.cumsum(rewards[1])])
-            result = np.mean(points[0] / points.sum())
+            _, rewards, _, _, _ = game.play_rounds(get_agent=lambda key: {0: agent1, 1: agent2}[team[key]], n=1)
+            points = np.array([np.sum(rewards[:, 0]), np.sum(rewards[:, 1])])
+            result = (points[0] / points.sum(), points[1] / points.sum())
         else:
-            _, rewards, _, _, _ = game.play_rounds(get_agent=lambda key: {1: agent1, 0: agent2}[team[key]], n=4)
-
-            points = np.array([np.cumsum(rewards[0]), np.cumsum(rewards[1])])
-            result = np.mean(points[1] / points.sum())
+            _, rewards, _, _, _ = game.play_rounds(get_agent=lambda key: {1: agent1, 0: agent2}[team[key]], n=1)
+            points = np.array([np.sum(rewards[:, 0]), np.sum(rewards[:, 1])])
+            result = (points[1] / points.sum(), points[0] / points.sum())
 
         queue.put(result)
 
@@ -55,23 +56,22 @@ def _play_games_(n_games_to_play, general_config, agent1_config, agent2_config, 
 
 def _play_games_threaded_(
         n_games,
-        max_parallel_threads_per_evaluation_process,
-        general_config,
+        parallel_threads_per_evaluation_process,
         agent1_config: WorkerConfig,
         agent2_config: WorkerConfig,
         results_queue):
     from jass_mu_zero.util import set_allow_gpu_memory_growth
     set_allow_gpu_memory_growth(True)
 
+    from jass_mu_zero.factory import get_network
     network1 = get_network(agent1_config, agent1_config.agent.network_path) if hasattr(agent1_config.agent, "network_path") else None
     network2 = get_network(agent2_config, agent2_config.agent.network_path) if hasattr(agent2_config.agent, "network_path") else None
 
     threads = []
-    for k in range(max_parallel_threads_per_evaluation_process):
-        games_to_play_per_thread = (n_games // max_parallel_threads_per_evaluation_process) + 1
+    for k in range(parallel_threads_per_evaluation_process):
+        games_to_play_per_thread = (n_games // parallel_threads_per_evaluation_process) + 1
         t = Thread(target=_play_games_, args=(
             games_to_play_per_thread,
-            general_config,
             agent1_config,
             agent2_config,
             network1,
@@ -88,8 +88,8 @@ def _evaluate_(
         agent1_config,
         agent2_config,
         skip_on_result_file,
-        max_parallel_processes_per_evaluation,
-        max_parallel_threads_per_evaluation_process,
+        parallel_processes_per_evaluation,
+        parallel_threads_per_evaluation_process,
         result_folder):
     result_file = Path(__file__).parent / "agents_eval_results" / result_folder / f"{agent1_config['note']}-vs-{agent2_config['note']}.json"
 
@@ -102,8 +102,10 @@ def _evaluate_(
         return
 
     logging.info(f"starting {agent1_config['note']}-vs-{agent2_config['note']} "
-                 f"with {max_parallel_processes_per_evaluation} parallel processes with {max_parallel_threads_per_evaluation_process} "
+                 f"with {parallel_processes_per_evaluation} parallel processes with {parallel_threads_per_evaluation_process} "
                  f"game threads each")
+
+    from jass_mu_zero.factory import get_features
 
     worker_config1 = WorkerConfig()
     if 'experiment_path' in agent1_config:
@@ -128,13 +130,12 @@ def _evaluate_(
     queue = mp.Queue()
     processes = []
     total_games = general_config["n_games"]
-    games_per_process = total_games // max_parallel_processes_per_evaluation
-    for k in range(max_parallel_processes_per_evaluation):
+    games_per_process = total_games // parallel_processes_per_evaluation
+    for k in range(parallel_processes_per_evaluation):
         p = Process(target=_play_games_threaded_,
                     args=(
                         games_per_process,
-                        max_parallel_threads_per_evaluation_process,
-                        general_config,
+                        parallel_threads_per_evaluation_process,
                         worker_config1,
                         worker_config2,
                         queue))
@@ -191,9 +192,9 @@ def _evaluate_(
 class MuZeroEvaluationCLI:
     @staticmethod
     def setup_args(parser):
-        parser.add_argument(f'--max_parallel_evaluations', default=1, type=int, help="Number of max parallel evaluations")
-        parser.add_argument(f'--max_parallel_processes_per_evaluation', default=1, type=int, help="Number of max parallel processes per evaluation")
-        parser.add_argument(f'--max_parallel_threads_per_evaluation_process', default=1, type=int, help="Number of max parallel threads per process per evaluation")
+        parser.add_argument(f'--parallel_evaluations', default=1, type=int, help="Number of max parallel evaluations")
+        parser.add_argument(f'--parallel_processes_per_evaluation', default=1, type=int, help="Number of max parallel processes per evaluation")
+        parser.add_argument(f'--parallel_threads_per_evaluation_process', default=1, type=int, help="Number of max parallel threads per process per evaluation")
         parser.add_argument(f'--no_skip_on_result_file', default=False, action="store_true", help="Skip evaluation if there exists a corresponding result file")
         parser.add_argument(f'--files', nargs="+", default=["mu_zero/experiment-0/dmcts.json"], help="Filenames of evaluations to be executed (relative to folder resources/evaluation)")
         parser.add_argument(f'--all', default=False, action="store_true", help="run all evaluations from resources/evaluation")
@@ -219,14 +220,14 @@ class MuZeroEvaluationCLI:
                 p = Process(target=_evaluate_, args=(
                     config, *comb,
                     not args.no_skip_on_result_file,
-                    args.max_parallel_processes_per_evaluation,
-                    args.max_parallel_threads_per_evaluation_process,
+                    args.parallel_processes_per_evaluation,
+                    args.parallel_threads_per_evaluation_process,
                     args.folder))
                 processes.append(p)
                 p.start()
 
                 nr_running_processes = len([x for x in processes if x.is_alive()])
-                while 0 < args.max_parallel_evaluations <= nr_running_processes:
+                while 0 < args.parallel_evaluations <= nr_running_processes:
                     time.sleep(1)
                     nr_running_processes = len([x for x in processes if x.is_alive()])
 

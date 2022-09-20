@@ -8,8 +8,8 @@
       "skip": false
     },
     {
-      "type": "random",
-      "note": "Random",
+      "type": "dmcts",
+      "note": "DMCTS",
       "skip": true
     }
   ]

@@ -4,7 +4,6 @@ services:
         build:
           context: .
           network: "host"
-        #network_mode: "host"
         volumes:
             - .:/app
         deploy:
@@ -14,5 +13,10 @@ services:
                 - driver: nvidia
                   device_ids: ['0']
                   capabilities: [gpu]
-
+        networks:
+          - net
+networks:
+  net:
+    external: true
+    name: jass_net
 

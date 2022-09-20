@@ -15,14 +15,7 @@ try:
     if 'SKIP_EXTERN' not in os.environ:
         cwd = Path(__file__).parent.resolve()
         subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"], cwd=cwd)
-
-        subprocess.check_call(["pip", "install", "."], cwd=cwd / "extern" / "jass_gym")
-        subprocess.check_call(["pip", "install", "."], cwd=cwd / "extern" / "jass-kit-py")
-        subprocess.check_call(["pip", "install", "."], cwd=cwd / "extern" / "jass-kit-cpp")
-        subprocess.check_call(["cmake", "."], cwd=cwd / "extern" / "jass-kit-cpp")
-        subprocess.check_call(["make", "install"], cwd=cwd / "extern" / "jass-kit-cpp")
-        subprocess.check_call(["pip", "install", "."], cwd=cwd / "extern" / "jass-ml-cpp")
-        subprocess.check_call(["pip", "install", "."], cwd=cwd / "extern" / "jass-ml-py")
+        subprocess.check_call(["pip", "install", "--no-cache", "."], cwd=cwd / "extern" / "jass_gym")
 except Exception as e:
     print("Failed to install extern modules...", e)
 

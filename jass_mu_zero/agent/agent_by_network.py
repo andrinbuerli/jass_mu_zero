@@ -1,12 +1,11 @@
 import logging
 
 import requests
-
 from jass.agents.agent import Agent
 from jass.agents.agent_random_schieber import AgentRandomSchieber
-from jass.game.const import card_ids
+from jass.game.const import PUSH, PUSH_ALT, TRUMP_FULL_OFFSET, card_ids
 from jass.game.game_observation import GameObservation
-from jass.service.player_service_route import SEND_INFO_PREFIX, SELECT_TRUMP_PATH_PREFIX, PLAY_CARD_PATH_PREFIX
+from jass.service.player_service_route import PLAY_CARD_PATH_PREFIX, SELECT_TRUMP_PATH_PREFIX, SEND_INFO_PREFIX
 
 
 class AgentByNetwork(Agent):
@@ -54,7 +53,10 @@ class AgentByNetwork(Agent):
 
     def action(self, obs: GameObservation) -> int:
         if obs.trump == -1:
-            action = self.action_trump(obs)
+            trump = self.action_trump(obs)
+            if trump == PUSH:
+                trump = PUSH_ALT
+            action = TRUMP_FULL_OFFSET + trump
         else:
             action = self.action_play_card(obs)
 

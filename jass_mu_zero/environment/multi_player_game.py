@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import Callable
 
 import gym
+import jasscpp
 import numpy as np
 from jass.game.const import team
 
@@ -23,26 +24,25 @@ class MultiPlayerGame:
         for i in range(n):
             done = False
             obs = self.env.reset()
-            try:
-                while not done:
-                    agentid = obs["observations"]["next_player"]
-                    obs = obs["observations"]["obs"]
+            while not done:
+                agentid = obs["observations"]["next_player"]
+                obs = obs["observations"]["obs"]
 
-                    agent = get_agent(agentid)
-                    action, probs, values = agent.action(obs)
+                agent = get_agent(agentid)
+                assert obs.hand.sum() > 0, f"no hand... {self.env._game.state.hands}, {self.env._game.state}"
+                action, probs, values = agent.action(obs)
 
-                    actions.append(action)
-                    action_probs.append(probs), action_values.append(values)
-                    observations.append(obs)
+                valid_actions = jasscpp.RuleSchieberCpp().get_full_valid_actions_from_obs(obs)
+                assert action in np.flatnonzero(valid_actions), f"{agent}: {action}, {valid_actions}"
 
-                    obs, reward, done, info = self.env.step(action)
+                actions.append(action)
+                action_probs.append(probs), action_values.append(values)
+                observations.append(obs)
 
-                    r = np.zeros(2)
-                    r[team[agentid]] = reward
+                obs, _, done, info = self.env.step(action)
 
-                    rewards.append(r)
-            except Exception as e:
-                print(e)
+                reward = info["team_reward"]
+                rewards.append(reward)
 
         return np.array(observations), np.array(rewards), np.array(actions), \
                np.array(action_probs), np.array(action_values)

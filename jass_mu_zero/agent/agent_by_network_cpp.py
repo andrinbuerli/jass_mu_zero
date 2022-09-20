@@ -1,3 +1,4 @@
+from jass.game.const import PUSH, PUSH_ALT, TRUMP_FULL_OFFSET
 from jasscpp import GameObservationCpp
 
 from jass_mu_zero.agent.agent_by_network import AgentByNetwork
@@ -20,6 +21,7 @@ class AgentByNetworkCpp(AgentByNetwork):
             obs = convert_to_python_game_state(obs)
         else:
             obs = convert_to_python_game_observation(obs)
+
         obs.player_view = obs.player
         return super().action_trump(obs)
 
@@ -30,3 +32,14 @@ class AgentByNetworkCpp(AgentByNetwork):
             obs = convert_to_python_game_observation(obs)
         obs.player_view = obs.player
         return super().action_play_card(obs)
+
+    def action(self, obs: GameObservationCpp) -> int:
+        if obs.trump == -1:
+            trump = self.action_trump(obs)
+            if trump == PUSH:
+                trump = PUSH_ALT
+            action = TRUMP_FULL_OFFSET + trump
+        else:
+            action = self.action_play_card(obs)
+
+        return action, None, None

@@ -1,5 +1,6 @@
 {
  "agent": {
+  "cheating": false,
   "type": "random",
   "name": "random",
   "port": 9896

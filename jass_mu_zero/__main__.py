@@ -103,6 +103,8 @@ class SchieberJassMuZeroCli(Callable):
             command = f"docker-compose -f {file} up -d"
 
         if self.args.baselines and command is None:
+            logging.info("Creating jass_net docker network")
+            os.system("docker network create jass_net")
             command = f"docker-compose -f " \
                       f"{Path(__file__).parent.parent / 'resources' / 'baselines' / 'baselines.yml'} up " + ("" if attach else " -d ")
         elif command is None:

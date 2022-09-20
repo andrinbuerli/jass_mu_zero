@@ -12,3 +12,9 @@ services:
         volumes:
             - ../../:/app
         command: sjmz --nodocker host --files mcts.json dmcts.json random.json dmcts-50.json dmcts-large.json mcts-large.json
+        networks:
+          - net
+networks:
+  net:
+    external: true
+    name: jass_net

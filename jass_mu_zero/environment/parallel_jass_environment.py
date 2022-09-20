@@ -15,7 +15,6 @@ import numpy as np
 from jass.features.feature_example_buffer import parse_feature_example
 from jass.features.labels_action_full import LabelSetActionFull
 from jass.game.const import TRUMP_FULL_OFFSET, TRUMP_FULL_P
-from jass_gym.jass_multi_agent_env import SchieberJassMultiAgentEnv
 from jass_gym.jass_single_agent_env import SchieberJassSingleAgentEnv
 from jasscpp import RuleSchieberCpp
 

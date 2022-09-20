@@ -23,19 +23,21 @@ class AgentDQN(CppAgent):
         self.features = FeaturesSetCppConv()
 
     def action_play_card(self, obs: GameObservationCpp) -> int:
-        return self.get_action(obs)
+        return self.action(obs)
 
     def action_trump(self, obs: GameObservationCpp) -> int:
-        action = self.get_action(obs) - 36
+        action = self.action(obs) - 36
         if action == PUSH_ALT:
             action = PUSH
 
         return action
 
-    def get_action(self, obs):
+    def action(self, obs):
         valid_actions = self.rule.get_valid_cards_from_obs(obs)
         obs = self.features.convert_to_features(obs, self.rule)
         masked_policy = self.model.inference(torch.tensor(obs.reshape(self.features.FEATURE_SHAPE)[None]),
                                              torch.tensor(valid_actions[None])).detach().numpy()[0]
 
-        return int(np.argmax(masked_policy))
+        action = int(np.argmax(masked_policy))
+
+        return action, None, None

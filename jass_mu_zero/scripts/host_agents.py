@@ -1,6 +1,5 @@
 import logging
 import multiprocessing as mp
-import sys
 
 from jass_mu_zero.agent.agent_from_cpp import AgentFromCpp
 from jass_mu_zero.agent.agent_from_cpp_cheating import AgentFromCppCheating
@@ -11,13 +10,6 @@ from jass_mu_zero.factory import get_agent, get_network
 mp.set_start_method('spawn', force=True)
 from multiprocessing import Process
 from pathlib import Path
-
-logging.basicConfig(
-    level=logging.INFO,
-    stream=sys.stdout,
-    format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s: %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
 
 
 def host_agent(config: WorkerConfig):
