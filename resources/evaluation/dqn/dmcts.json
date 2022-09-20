@@ -1,0 +1,16 @@
+{
+  "n_games": 10000,
+  "information": "imperfect",
+  "agents": [
+    {
+      "type": "dqn",
+      "note": "DQN",
+      "skip": false
+    },
+    {
+      "type": "random",
+      "note": "Random",
+      "skip": true
+    }
+  ]
+}
