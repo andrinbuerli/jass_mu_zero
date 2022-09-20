@@ -12,6 +12,10 @@ class FeaturesSetCpp:
     # subclasses define a feature length both on class and instance level
     FEATURE_LENGTH = 0                          # type: int
 
+    @property
+    def shape(self):
+        return self.FEATURE_SHAPE
+
     def __init__(self):
         """
         Initialize
@@ -22,6 +26,9 @@ class FeaturesSetCpp:
     @property
     def feature_length(self):
         return self._feature_length
+
+    def __call__(self, obs):
+        return self.convert_to_features(obs, jasscpp.RuleSchieberCpp()).reshape(self.shape)
 
     def convert_to_features(self, obs: Union[jasscpp.GameObservationCpp, jasscpp.GameStateCpp],
                             rule: jasscpp.RuleSchieberCpp) -> np.ndarray:

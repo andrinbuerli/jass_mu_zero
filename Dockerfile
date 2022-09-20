@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.7.0-gpu
+FROM tensorflow/tensorflow:2.7.0
 
 ARG DEV
 
@@ -31,14 +31,15 @@ RUN wget https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-g
 RUN tar -C /usr/local -xzf libtensorflow-gpu-linux-x86_64-2.6.0.tar.gz
 RUN rm libtensorflow-gpu*
 
+RUN chown -hR 1000 /usr
+RUN adduser user --uid 1000
+RUN adduser user sudo
+
 COPY . /app/
 WORKDIR /app
 
 # add user
 RUN chown -hR 1000 /app
-RUN chown -hR 1000 /usr
-RUN adduser user --uid 1000
-RUN adduser user sudo
 USER user
 
 RUN git config --global --add safe.directory /app

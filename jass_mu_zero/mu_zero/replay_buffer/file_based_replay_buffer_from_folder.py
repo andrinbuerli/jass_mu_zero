@@ -228,7 +228,7 @@ class FileBasedReplayBufferFromFolder:
 
                 nr_new_trajectories = 0
                 for o, a, r, p, v in zip(observations, actions, rewards, probs, values):
-                    episode_length = 37 if observations[-1].sum() == 0 else 38
+                    episode_length = 37 if o[-1].sum() == 0 else 38
 
                     assert np.allclose(p[:episode_length].sum(axis=-1), 1)
 

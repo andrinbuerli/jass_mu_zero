@@ -2,6 +2,7 @@ import json
 
 import jasscpp
 import numpy as np
+import pytest
 from jass.arena.dealing_card_random_strategy import DealingCardRandomStrategy
 from jass.game.game_state import GameState
 from jass.game.game_state_util import observation_from_state, state_from_complete_game
@@ -61,14 +62,13 @@ def test_select():
     child = testee.tree_policy(root_node=node, stats=MinMaxStats(), observation=obs)
 
     assert child.parent is node
-    assert child.valid_actions.sum() == 36
-
     assert node.prior is not None
     assert node.value is not None
     assert node.reward is not None
     assert node.hidden_state is not None
 
 
+@pytest.mark.skip("true player function is not implemented anymore")
 def test_get_next_player():
     game_string = '{"trump":5,"dealer":3,"tss":1,"tricks":[' \
                   '{"cards":["C7","CK","C6","CJ"],"points":17,"win":0,"first":2},' \
@@ -143,8 +143,8 @@ def test_select_players_push():
 
         child = testee.tree_policy(root_node=node, stats=MinMaxStats(), observation=obs)
         assert child.action == a
-        assert child.next_player == game.state.player
         node = child
+
 
 def test_select_players_not_push():
     config = get_test_config()
@@ -177,9 +177,8 @@ def test_select_players_not_push():
 
         child = testee.tree_policy(root_node=node, stats=MinMaxStats(), observation=obs)
         assert child.action == a
-        assert child.next_player == game.state.player
-        node = child
 
+        node = child
 
 
 def test_select_players_middle_of_game():
@@ -219,5 +218,4 @@ def test_select_players_middle_of_game():
 
         child = testee.tree_policy(root_node=node, stats=MinMaxStats(), observation=obs)
         assert child.action == a
-        assert child.next_player == game.state.player
         node = child

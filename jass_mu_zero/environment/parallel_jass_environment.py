@@ -15,22 +15,24 @@ import numpy as np
 from jass.features.feature_example_buffer import parse_feature_example
 from jass.features.labels_action_full import LabelSetActionFull
 from jass.game.const import TRUMP_FULL_OFFSET, TRUMP_FULL_P
+from jass_gym.jass_multi_agent_env import SchieberJassMultiAgentEnv
+from jass_gym.jass_single_agent_env import SchieberJassSingleAgentEnv
 from jasscpp import RuleSchieberCpp
 
 from jass_mu_zero.agent.agent_full_action_space import AgentFullActionSpace
 from jass_mu_zero.environment.multi_player_game import MultiPlayerGame
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
 from jass_mu_zero.factory import get_agent, get_network
+from jass_mu_zero.observation.identity_observation_builder import IdentityObservationBuilder
 
 
 def _single_self_play_game_(i, agent: AgentFullActionSpace):
-    state_features, check_move_validity = _single_self_play_game_.feature_extractor, _single_self_play_game_.check_move_validity
+    state_features = _single_self_play_game_.feature_extractor
 
-    game = MultiPlayerGame(env=SchieberJassMultiAgentEnv(observation_builder=state_features))
-    observations, rewards, actions, action_probs, action_values = game.play_round(get_agent=lambda key: agent)
+    game = MultiPlayerGame(env=SchieberJassSingleAgentEnv(observation_builder=IdentityObservationBuilder()))
+    observations, rewards, actions, action_probs, action_values = game.play_rounds(get_agent=lambda key: agent)
 
-    action_probs = np.stack(action_probs)
-    action_values = np.stack(action_values)
+    observations = [state_features(x) for x in observations]
 
     if len(observations) == 37:  # pad if no push
         observations = np.concatenate((observations, np.zeros_like(observations[-1])[None]), axis=0)
@@ -72,7 +74,6 @@ def play_games(n_games, network, pool, worker_config):
     probs = [x[3] for x in results]
     values = [x[4] for x in results]
 
-    [x.reset() for x in agents]
     del agents
 
     return actions, values, probs, rewards, states
@@ -109,7 +110,6 @@ def reanalyse(dataset, network, pool, worker_config):
     assert rewards.sum() == 157
 
     probs = np.array([x[0] for x in results])
-    outcomes = np.take_along_axis((y[:, 43:45] * 157).astype(int)[:episode_length], current_teams, axis=1)
     values = np.array([(x[0][:, None]*x[1]).sum(axis=0) for x in results])
 
     if len(states) == 37:  # pad if no push
@@ -117,7 +117,6 @@ def reanalyse(dataset, network, pool, worker_config):
         actions = np.concatenate((actions, np.zeros_like(actions[-1])[None]), axis=0)
         rewards = np.concatenate((rewards, np.zeros_like(rewards[-1])[None]), axis=0)
         probs = np.concatenate((probs, np.zeros_like(probs[-1])[None]), axis=0)
-        outcomes = np.concatenate((outcomes, np.zeros_like(outcomes[-1])[None]), axis=0)
         values = np.concatenate((values, np.zeros_like(values[-1])[None]), axis=0)
 
     return actions[None], values[None], probs[None], rewards[None], states[None]
@@ -146,7 +145,6 @@ def _play_games_multi_threaded_(n_games, continuous):
                 x,
                 feature_length=38 * worker_config.network.feature_extractor.FEATURE_LENGTH,
                 label_length=38 * LabelSetActionFull.LABEL_LENGTH)).repeat())
-
 
     network = get_network(worker_config, network_path=network_path)
     while continuous or first_call:

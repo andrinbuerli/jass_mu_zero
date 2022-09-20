@@ -51,3 +51,11 @@ class AgentByNetwork(Agent):
         except Exception as e:
             self._logger.error(f'No response from network player, using standin player ({e})')
             return self._standin_player.action_play_card(obs)
+
+    def action(self, obs: GameObservation) -> int:
+        if obs.trump == -1:
+            action = self.action_trump(obs)
+        else:
+            action = self.action_play_card(obs)
+
+        return action, None, None

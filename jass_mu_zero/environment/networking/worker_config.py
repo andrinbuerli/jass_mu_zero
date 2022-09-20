@@ -134,7 +134,6 @@ class AgentConfig(BaseConfig):
         self.mdp_value = False
         self.virtual_loss = 10
         self.n_search_threads = 4
-        self.player_func = False
         self.terminal_func = False
 
         # dmcts

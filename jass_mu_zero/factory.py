@@ -2,17 +2,17 @@ from pathlib import Path
 
 import numpy as np
 
+from jass_mu_zero.agent.agent import CppAgent
+from jass_mu_zero.agent.agent_by_network_cpp import AgentByNetworkCpp
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
-from jass_mu_zero.jass.agent.agent import CppAgent
-from jass_mu_zero.jass.agent.agent_by_network_cpp import AgentByNetworkCpp
-from jass_mu_zero.jass.features.features_conv_cpp import FeaturesSetCppConv
-from jass_mu_zero.jass.features.features_cpp_conv_cheating import FeaturesSetCppConvCheating
+from jass_mu_zero.observation.features_conv_cpp import FeaturesSetCppConv
+from jass_mu_zero.observation.features_cpp_conv_cheating import FeaturesSetCppConvCheating
 from jass_mu_zero.observation.features_set_cpp import FeaturesSetCpp
 
 
 def get_agent(config: WorkerConfig, network, greedy=False, force_local=False) -> CppAgent:
     if config.agent.type == "mu-zero-mcts":
-        from jass_mu_zero.mu_zero.mcts.agent_mu_zero_mcts import AgentMuZeroMCTS
+        from jass_mu_zero.agent.agent_mu_zero_mcts import AgentMuZeroMCTS
         return AgentMuZeroMCTS(
             network=network,
             feature_extractor=config.network.feature_extractor,
@@ -26,21 +26,20 @@ def get_agent(config: WorkerConfig, network, greedy=False, force_local=False) ->
             mdp_value=config.agent.mdp_value,
             virtual_loss=config.agent.virtual_loss,
             n_search_threads=config.agent.n_search_threads,
-            use_player_function=config.agent.player_func,
             use_terminal_function=config.agent.terminal_func,
         )
     elif config.agent.type == "policy":
-        from jass_mu_zero.mu_zero.mcts.agent_policy import AgentPolicy
+        from jass_mu_zero.agent.agent_policy import AgentPolicy
         return AgentPolicy(
             network=network,
             feature_extractor=config.network.feature_extractor,
             temperature=config.agent.temperature if not greedy else 5e-2,
         )
     elif config.agent.type == "dqn":
-        from jass_mu_zero.jass.agent.agent_dqn import AgentDQN
+        from jass_mu_zero.agent.agent_dqn import AgentDQN
         return AgentDQN(model_path=str(Path(__file__).resolve().parent.parent / "resources" / "dqn.pt"))
     elif config.agent.type == "value":
-        from jass_mu_zero.mu_zero.mcts.agent_value import AgentValue
+        from jass_mu_zero.agent.agent_value import AgentValue
         return AgentValue(
             network=network,
             feature_extractor=config.network.feature_extractor,
@@ -116,10 +115,10 @@ def get_network(config: WorkerConfig, network_path: str = None):
             fc_terminal_state_layers=config.network.fc_terminal_state_layers,
             support_size=config.network.support_size,
             players=config.network.players,
-            network_path=network_path,
             mask_private=config.optimization.mask_private,
             mask_valid=config.optimization.mask_valid,
-            fully_connected=config.network.fully_connected
+            fully_connected=config.network.fully_connected,
+            network_path=network_path
         )
 
         return network
@@ -131,11 +130,7 @@ def get_optimizer(config: WorkerConfig):
     import tensorflow_addons as tfa
 
     if config.optimization.optimizer == "adam":
-        if config.optimization.learning_rate_init is None:
-            lr = config.optimization.learning_rate
-        else:
-            from jass_mu_zero.mu_zero.cosine_lr_scheduler import CosineLRSchedule
-            lr = CosineLRSchedule(learning_rate_init=config.optimization.learning_rate_init, max_steps=config.optimization.total_steps)
+        lr = config.optimization.learning_rate
 
         return tfa.optimizers.AdamW(
             learning_rate=lr,
@@ -166,7 +161,6 @@ def get_opponent(type: str) -> CppAgent:
     elif type == "random":
         return AgentByNetworkCpp(url="http://baselines:9896/random")
     raise NotImplementedError(f"Opponent type {type} is not implemented.")
-
 
 
 def get_features(type: str) -> FeaturesSetCpp:

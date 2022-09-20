@@ -28,7 +28,6 @@ class LatentNodeSelectionPolicy:
             dirichlet_eps: float = 0.25,
             dirichlet_alpha: float = 0.3,
             mdp_value: bool = False,
-            use_player_function: bool = False,
             use_terminal_function: bool = False):
         """
         Initialise the selection policy
@@ -41,12 +40,10 @@ class LatentNodeSelectionPolicy:
         :param dirichlet_eps: dirichlet epsilon
         :param dirichlet_alpha: dirichlet alpha
         :param mdp_value: boolean indicating if mdp value should be used
-        :param use_player_function: boolean indicating if the estimated player function should be used
         :param use_terminal_function: boolean indicating if the estimated terminal function should be used
         """
 
         self.use_terminal_function = use_terminal_function
-        self.use_player_function = use_player_function
         self.mdp_value = mdp_value
         self.discount = discount
         self.c_2 = c_2
@@ -108,7 +105,7 @@ class LatentNodeSelectionPolicy:
                             child.visits += virtual_loss
                             child.value, child.reward, child.prior, child.predicted_player, _, child.is_post_terminal, child.hidden_state = \
                                 self.network.recurrent_inference(node.hidden_state, np.array([[child.action]]), all_preds=True)
-                            self._expand_node(child, observation, observation_feature_format)
+                            self._expand_node(child)
                         break
 
             node = child
@@ -133,7 +130,7 @@ class LatentNodeSelectionPolicy:
                 features = self.feature_extractor.convert_to_features(observation, rule)[None]
             node.value, node.reward, node.prior, node.predicted_player, _, node.is_post_terminal, node.hidden_state =\
                 self.network.initial_inference(features, all_preds=True)
-            self._expand_node(node, root_obs=observation, observation_feature_format=observation_feature_format)
+            self._expand_node(node)
 
             valid_idxs = np.where(node.valid_actions)[0]
             eta = np.random.dirichlet(self.dirichlet_alpha[:len(valid_idxs)])
@@ -150,11 +147,7 @@ class LatentNodeSelectionPolicy:
     def _exploitation_term(self, child: Node, stats: MinMaxStats):
         if child.visits > 0:
             with child.lock:
-                if self.use_player_function:
-                    next_player = child.parent.predicted_player.argmax()
-                else:
-                    next_player = child.parent.next_player
-
+                next_player = child.parent.next_player
                 q = (child.value_sum[next_player] / child.visits)
                 assert len(child.reward.shape) == 1, f'shape: {child.reward.shape}'
                 q_value = (child.reward[next_player] + self.discount * q) \
@@ -167,14 +160,11 @@ class LatentNodeSelectionPolicy:
         return q_value
 
     def _get_is_terminal_state(self, child):
-        if self.use_player_function:
-            is_terminal_state = child.is_post_terminal > 0.5 if (
-                        self.use_terminal_function and child.is_post_terminal is not None) else False
-        else:
-            is_terminal_state = child.next_player == -1
+        is_terminal_state = child.is_post_terminal > 0.5 if (
+                    self.use_terminal_function and child.is_post_terminal is not None) else False
         return is_terminal_state
 
-    def _expand_node(self, node: Node, root_obs: jasscpp.GameObservationCpp, observation_feature_format):
+    def _expand_node(self, node: Node):
         node.value, node.reward, node.prior, node.predicted_player, node.is_post_terminal = \
             [x.numpy().squeeze() for x in [node.value, node.reward, node.prior, node.predicted_player, node.is_post_terminal]]
 
@@ -189,77 +179,8 @@ class LatentNodeSelectionPolicy:
 
         # add edges for all children
         for action in node.missing_actions(node.valid_actions):
-            if self.use_player_function:
-                #add one child edge
-                node.add_child(
-                    action=action,
-                    next_player=-1,
-                    pushed=-1,
-                    trump=-1,
-                    mask_invalid=False)
-            else:
-                if action < TRUMP_FULL_OFFSET:
-                    nr_played_cards = len(node.cards_played)
-                    next_state_is_at_start_of_trick = (nr_played_cards + 1) % 4 == 0
-                    if next_state_is_at_start_of_trick:
-                        next_player_in_game = self._get_start_trick_next_player(action, node, root_obs, observation_feature_format)
-                    else:
-                        next_player_in_game = next_player[node.next_player]
-                    node.add_child(
-                        action=action,
-                        next_player=next_player_in_game,
-                        cards_played=list(node.cards_played + [action]))
-                else:
-                    trump = -1
-                    pushed = None
-                    if action == TRUMP_FULL_P:  # PUSH
-                        next_player_in_game = (node.next_player + 2) % 4
-                        pushed = True
-                    else:  # TRUMP
-                        if node.pushed:
-                            next_player_in_game = (node.next_player + 2) % 4
-                        else:
-                            next_player_in_game = node.next_player
-                        trump = action - 36
-                    node.add_child(
-                        action=action,
-                        next_player=next_player_in_game,
-                        pushed=pushed,
-                        trump=trump) # mask push if played
-
-    def _get_start_trick_next_player(self, action, node, root_obs, observation_feature_format):
-        assert node.trump > -1
-
-        prev_actions = [action]
-        prev_values = [card_values[node.trump, action]]
-        players = [node.next_player]
-        parent = node
-
-        if observation_feature_format is None:
-            tricks = root_obs.tricks
-            trick_first_player = root_obs.trick_first_player
-        else:
-            tricks = observation_feature_format.tricks
-            trick_first_player = observation_feature_format.trick_first_player
-
-        while parent.parent is not None and len(prev_actions) < 4:
-            prev_actions.append(parent.action)
-            prev_values.append(card_values[node.trump, parent.action])
-            players.append(parent.player)
-            parent = parent.parent
-
-        num_cards = len(prev_actions)
-        current_trick = len(node.cards_played) // 4
-        for i in range(4 - num_cards):
-            j = 4 - 1 - num_cards - i
-            card = tricks[current_trick][j]
-            prev_actions.append(card)
-            prev_values.append(card_values[node.trump, card])
-            players.append((trick_first_player[current_trick] - j) % 4)
-
-        assert sum(players) == sum([0, 1, 2, 3]) and len(players) == 4, "invalid previous players"
-        assert len(prev_actions) == 4 and len(prev_values) == 4, "invalid previous cards"
-
-        next_player = self.rule.calc_winner(np.array(prev_actions[::-1]), players[-1], trump=node.trump)
-        assert 0 <= next_player <= 3, "invalid next player"
-        return next_player
+            node.add_child(
+                action=action,
+                next_player=node.predicted_player.argmax(),
+                trump=-1,
+                mask_invalid=False)

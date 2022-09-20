@@ -157,6 +157,7 @@ def test_buffer_restore():
 
     del testee1, testee2
 
+
 def test_sample_trajectory():
     testee = FileBasedReplayBufferFromFolder(
         max_buffer_size=1000,
@@ -184,10 +185,9 @@ def test_sample_trajectory():
     idx, priority, identifier = testee.sum_tree.get(s, timeout=10)
     file = testee.trajectory_data_folder / f"{identifier}{testee.data_file_ending}"
     with open(str(file), "rb") as f:
-        episode = pickle.load(f)
-    states, actions, rewards, probs, outcomes = testee._sample_trajectory(episode, i=36)
+        states, actions, rewards, probs, values = pickle.load(f)
 
-    assert probs[-1, :].sum() == 0 and rewards[-1, :].sum() == 0 and outcomes[-1, :].sum() == 157
+    assert probs[0, :].sum() == 1 and (rewards > 0).any() and values[-1, :].sum() == 157
 
     testee.stop_sampling()
     del testee
@@ -222,7 +222,7 @@ def test_sample_trajectory_mdp_value():
     with open(str(file), "rb") as f:
         episode = pickle.load(f)
 
-    states, actions, rewards, probs, outcomes = testee._sample_trajectory(episode, i=0)
+    states, actions, rewards, probs, outcomes = testee._sample_trajectory(episode, episode_length=37, i=0)
 
     assert (outcomes[0] != outcomes[-1]).any()
 

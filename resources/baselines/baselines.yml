@@ -1,7 +1,7 @@
 version: '3.8'
 services:
     baselines:
-        build: .
+        build: ../../.
         ports:
           - 9899:9899
           - 9898:9898
@@ -10,5 +10,5 @@ services:
           - 9894:9894
           - 9893:9893
         volumes:
-            - .:/app
-        command: sjmz --files mcts.json dmcts.json random.json dmcts-50.json dmcts-large.json mcts-large.json
+            - ../../:/app
+        command: sjmz --nodocker host --files mcts.json dmcts.json random.json dmcts-50.json dmcts-large.json mcts-large.json

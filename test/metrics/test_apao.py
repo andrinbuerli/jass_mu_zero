@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from jass_mu_zero.environment.networking.worker_config import WorkerConfig
 from jass_mu_zero.mu_zero.metrics.apao import APAO
 from test.util import get_test_config
 
@@ -8,8 +7,8 @@ from test.util import get_test_config
 def test_apao_random():
     config = get_test_config()
 
-    config.agent.iterations = 20
-    config.agent.n_search_threads = 4
+    config.agent.iterations = 1
+    config.agent.n_search_threads = 1
 
     testee = APAO(
         opponent_name="random",
@@ -23,6 +22,7 @@ def test_apao_random():
     result = testee.get_latest_result()
     print(result)
     assert result is not None
+
 
 def test_apao_perfect():
     config = get_test_config(cheating=True)

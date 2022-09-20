@@ -23,11 +23,11 @@ def test_shapes():
 
 def test_summary():
     testee = MuZeroResidualNetwork(
-        observation_shape=(4, 9, 48),
+        observation_shape=(4, 9, 45),
         action_space_size=43,
-        num_blocks_representation=10,
+        num_blocks_representation=1,
         fcn_blocks_representation=0,
-        num_blocks_dynamics=10,
+        num_blocks_dynamics=1,
         fcn_blocks_dynamics=0,
         num_blocks_prediction=0,
         num_channels=128,
@@ -46,6 +46,8 @@ def test_summary():
         players=4,
         fully_connected=False
     )
+
+    testee.save("imperfect_resnet_random.pd")
 
     testee.summary()
 
@@ -90,6 +92,43 @@ def test_save_and_load():
     testee.load(path)
 
     assert testee.get_weight_list()[0][0][0][0][0] != 1000
+
+    shutil.rmtree(path)
+
+
+def test_save_and_load_with_inference():
+    testee = get_test_resnet()
+
+    path = f"test{id(testee)}.pd"
+    testee.save(path)
+
+    testee = MuZeroResidualNetwork(
+        observation_shape=(4, 9, 45),
+        action_space_size=43,
+        num_blocks_representation=1,
+        fcn_blocks_representation=0,
+        num_blocks_dynamics=1,
+        fcn_blocks_dynamics=0,
+        num_blocks_prediction=0,
+        num_channels=256,
+        reduced_channels_reward=128,
+        reduced_channels_value=1,
+        reduced_channels_policy=128,
+        fc_reward_layers=[256],
+        fc_value_layers=[256],
+        fc_policy_layers=[256],
+        fc_hand_layers=[256],
+        fc_player_layers=[256],
+        fc_terminal_state_layers=[256],
+        mask_valid=False,
+        mask_private=False,
+        support_size=100,
+        players=4,
+        fully_connected=False,
+        network_path=path
+    )
+
+    pred = testee.initial_inference(np.zeros((1, 4*9*45)))
 
     shutil.rmtree(path)
 

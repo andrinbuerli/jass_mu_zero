@@ -6,6 +6,8 @@ from jass.game.const import PUSH, PUSH_ALT
 
 from jasscpp import GameObservationCpp
 
+from jass_mu_zero.agent.agent import CppAgent
+
 
 class AgentFullActionSpace(CppAgent):
 
@@ -41,7 +43,7 @@ class AgentFullActionSpace(CppAgent):
 
     def action(self, obs: GameObservationCpp) -> (int, np.array, np.array):
         distribution, values = self.get_play_action_probs_and_values(obs)
-        card_distribution = self._heat_prob(distribution[:36])
+        card_distribution = self._heat_prob(distribution)
         action = np.random.choice(np.arange(0, 43, 1), p=card_distribution)
 
         logging.debug(f'Action response: {action}')

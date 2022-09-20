@@ -83,14 +83,16 @@ class SchieberJassMuZeroCli(Callable):
 
         command = None
 
+        attach = (self.args.attach and not self.args.nodocker)
+
         if self.args.test and self.args.nodocker:
             path = Path(__file__).parent.parent / 'test'
             logging.info(f"Running test at {path}")
-            os.system(f"pytest --forked -n auto --timeout=120 {path} -v")
+            os.system(f"pytest --forked -n auto --timeout=120 {path} ")
             return
         elif self.args.test and not self.args.nodocker:
-            path = Path(__file__).parent.parent / 'test'
-            command = f"pytest --forked -n auto --timeout=120 {path} -v"
+            command = "docker-compose run " + ("" if attach else " -d ")\
+                      + "mu_zero pytest  --forked -n auto --timeout=120  -v /app/test"
 
         if self.args.command == "collect" and self.args.nodocker:
             from jass_mu_zero.scripts.collect_n_send_game_data import MuZeroDataCollectionCLI
@@ -102,16 +104,15 @@ class SchieberJassMuZeroCli(Callable):
 
         if self.args.baselines and command is None:
             command = f"docker-compose -f " \
-                      f"{Path(__file__).parent.parent.parent / 'resources' / 'baselines' / 'baselines.yml'} up -d"
+                      f"{Path(__file__).parent.parent / 'resources' / 'baselines' / 'baselines.yml'} up " + ("" if attach else " -d ")
         elif command is None:
             command = 'bash -c "'
             command += 'sjmz --nodocker ' + " ".join(sys.argv[1:])
             command += '"'
 
-            attach = (self.args.attach and not self.args.nodocker)
-            command = "docker-compose run " + ("" if attach else " -d ") + "mam_gym " + command
+            command = "docker-compose run " + ("" if attach else " -d ") + "mu_zero " + command
 
-        print("executing", command, "in docker container")
+        print("executing", command, "in docker container, attach:", attach)
 
         os.system(command)
 

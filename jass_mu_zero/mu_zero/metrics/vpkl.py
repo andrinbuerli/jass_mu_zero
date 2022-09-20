@@ -106,7 +106,7 @@ class VPKL(BaseAsyncMetric):
         self.trajectory_length = trajectory_length
         if tf_record_files is None:
             tf_record_files = [str(x.resolve()) for x in
-                               (Path(__file__).parent.parent.parent / "resources" / "supervised_data").glob(
+                               (Path(__file__).parent.parent.parent.parent / "resources" / "supervised_data").glob(
                                    file_ending)]
 
         self.n_steps_ahead = n_steps_ahead

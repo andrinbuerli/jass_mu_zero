@@ -1,19 +1,16 @@
-import argparse
 import logging
-import sys
 import multiprocessing as mp
+import sys
+
+from jass_mu_zero.agent.agent_from_cpp import AgentFromCpp
+from jass_mu_zero.agent.agent_from_cpp_cheating import AgentFromCppCheating
+from jass_mu_zero.environment.networking.worker_config import WorkerConfig
+from jass_mu_zero.environment.service.player_service_app import PlayerServiceApp
+from jass_mu_zero.factory import get_agent, get_network
 
 mp.set_start_method('spawn', force=True)
 from multiprocessing import Process
 from pathlib import Path
-
-sys.path.append("../")
-
-from jass_mu_zero.jass.service.player_service_app import PlayerServiceApp
-from jass_mu_zero.environment.networking.worker_config import WorkerConfig
-from jass_mu_zero.jass.agent.agent_from_cpp import AgentFromCpp
-from jass_mu_zero.jass.agent.agent_from_cpp_cheating import AgentFromCppCheating
-from jass_mu_zero.factory import get_agent, get_network
 
 logging.basicConfig(
     level=logging.INFO,

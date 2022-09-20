@@ -4,6 +4,8 @@ import time
 from multiprocessing import Queue
 from pathlib import Path
 
+import pytest
+
 from jass_mu_zero.environment.parallel_jass_environment import ParallelJassEnvironment
 from test.util import get_test_config
 
@@ -11,8 +13,8 @@ from test.util import get_test_config
 def test_collect_data():
     config = get_test_config(cheating=False)
 
-    config.agent.iterations = 10
-    config.agent.n_search_threads = 4
+    config.agent.iterations = 1
+    config.agent.n_search_threads = 1
 
     path = Path(__file__).parent.parent / "resources" / "imperfect_resnet_random.pd"
     testee = ParallelJassEnvironment(
@@ -33,8 +35,8 @@ def test_collect_data():
 def test_collect_data_parallel_processes():
     config = get_test_config()
 
-    config.agent.iterations = 10
-    config.agent.n_search_threads = 4
+    config.agent.iterations = 1
+    config.agent.n_search_threads = 1
 
     path = Path(__file__).parent.parent / "resources" / "imperfect_resnet_random.pd"
     testee = ParallelJassEnvironment(
@@ -59,8 +61,8 @@ def test_collect_data_parallel_processes():
 def test_collect_data_parallel_threads():
     config = get_test_config()
 
-    config.agent.iterations = 10
-    config.agent.n_search_threads = 4
+    config.agent.iterations = 1
+    config.agent.n_search_threads = 1
 
     path = Path(__file__).parent.parent / "resources" / "imperfect_resnet_random.pd"
     testee = ParallelJassEnvironment(
@@ -84,8 +86,8 @@ def test_collect_data_parallel_threads():
 def test_collect_more_data_parallel_processes():
     config = get_test_config()
 
-    config.agent.iterations = 10
-    config.agent.n_search_threads = 4
+    config.agent.iterations = 1
+    config.agent.n_search_threads = 1
 
     path = Path(__file__).parent.parent / "resources" / "imperfect_resnet_random.pd"
     testee = ParallelJassEnvironment(
@@ -110,8 +112,8 @@ def test_collect_more_data_parallel_processes():
 def test_collect_more_data_parallel_threads():
     config = get_test_config()
 
-    config.agent.iterations = 10
-    config.agent.n_search_threads = 4
+    config.agent.iterations = 1
+    config.agent.n_search_threads = 1
 
     path = Path(__file__).parent.parent / "resources" / "imperfect_resnet_random.pd"
     testee = ParallelJassEnvironment(
@@ -199,10 +201,11 @@ def test_collect_data_continuous():
     del testee
 
 
+@pytest.mark.skip("no data mounted at /data")
 def test_collect_data_reanalyse():
     config = get_test_config(cheating=False)
 
-    config.agent.iterations = 20
+    config.agent.iterations = 1
     config.agent.n_search_threads = 1
 
     path = Path(__file__).parent.parent / "resources" / "imperfect_resnet_random.pd"
@@ -225,10 +228,11 @@ def test_collect_data_reanalyse():
     assert states.shape[1] == 38
 
 
+@pytest.mark.skip("no data mounted at /data")
 def test_collect_data_continuous_reanalyse():
     config = get_test_config()
 
-    config.agent.iterations = 50
+    config.agent.iterations = 1
     config.agent.n_search_threads = 1
 
     path = Path(__file__).parent.parent / "resources" / "imperfect_resnet_random.pd"

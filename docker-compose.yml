@@ -4,10 +4,9 @@ services:
         build:
           context: .
           network: "host"
+        #network_mode: "host"
         volumes:
             - .:/app
-        ports:
-          - 8080:8080
         deploy:
           resources:
             reservations:

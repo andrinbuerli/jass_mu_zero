@@ -101,7 +101,6 @@ class MuZeroResidualNetwork(AbstractNetwork):
             self.load(network_path, from_graph=True)
             self._warmup(assertion=False)
 
-
     def prediction(self, encoded_state, training=False, inc_player=False):
         policy, value, player, hand, is_terminal = self.prediction_network(encoded_state, training=training)
         if training or inc_player:
@@ -261,7 +260,8 @@ TOTAL: {sum([representation_params, dynamics_params, prediction_params]):,} trai
         return encoded_state_normalized
 
     def _warmup(self, assertion=True):
-        encoded_state = self.representation(np.random.uniform(0, 1, (1,) + tuple(self.observation_shape)).reshape(1, -1))
+        encoded_state = self.representation(
+            np.random.uniform(0, 1, (1,) + tuple(self.observation_shape)).reshape(1, -1).astype("float32"))
         encoded_next_state, reward = self.dynamics(encoded_state, action=np.array([[1]]))
         policy, value = self.prediction(encoded_next_state)
         if assertion:

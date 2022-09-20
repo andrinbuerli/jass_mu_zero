@@ -1,5 +1,4 @@
 from jass_mu_zero.environment.networking.worker_config import WorkerConfig
-from jass_mu_zero.mu_zero.network.resnet import MuZeroResidualNetwork
 from jass_mu_zero.observation.features_conv_cpp import FeaturesSetCppConv
 from jass_mu_zero.observation.features_cpp_conv_cheating import FeaturesSetCppConvCheating
 
@@ -7,22 +6,24 @@ from jass_mu_zero.observation.features_cpp_conv_cheating import FeaturesSetCppCo
 def get_test_config(cheating=False):
     config = WorkerConfig(features=FeaturesSetCppConv() if not cheating else FeaturesSetCppConvCheating())
     config.network.type = "resnet"
-    config.network.num_blocks_representation = 8
+    config.network.num_blocks_representation = 1
     config.network.fcn_blocks_representation = 0
-    config.network.fcn_blocks_representation = 8
+    config.network.fcn_blocks_representation = 1
     config.network.num_blocks_prediction = 0
     config.network.num_blocks_prediction = 0
-    config.network.num_channels = 256
+    config.network.num_channels = 128
     config.network.support_size = 100
     return config
 
+
 def get_test_resnet():
+    from jass_mu_zero.mu_zero.network.resnet import MuZeroResidualNetwork
     network = MuZeroResidualNetwork(
         observation_shape=(4, 9, 45),
         action_space_size=43,
-        num_blocks_representation=8,
+        num_blocks_representation=1,
         fcn_blocks_representation=0,
-        num_blocks_dynamics=8,
+        num_blocks_dynamics=1,
         fcn_blocks_dynamics=0,
         num_blocks_prediction=0,
         num_channels=256,
