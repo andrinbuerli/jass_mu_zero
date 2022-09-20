@@ -23,7 +23,7 @@ $ sjmz --baselines
 
 ## Training
 The MuZero training process is implemented in a distributed manner.
-The docker-compose service `trainer` is the master container which will gather all the data, train the networks
+The `trainer` is the master which will gather all the data, train the networks
 and evaluate them asynchronously on different metrics.
 In the folder `resources/data_collectors` there are different compose files for different machines to host data collectors.
 They all assume that the master container is running on the `ws03` machine (IP: 10.180.39.13).

@@ -35,17 +35,18 @@ class SchieberJassMuZeroCli(Callable):
 
         subparsers = parser.add_subparsers(dest="command")
 
-        eval_parser = subparsers.add_parser("train", description="Train MuZero model")
+        train_parser = subparsers.add_parser("train", description="Train MuZero model")
         try:
             from jass_mu_zero.scripts.train_mu_zero import MuZeroTrainingCLI
-            MuZeroTrainingCLI.setup_args(eval_parser)
+            MuZeroTrainingCLI.setup_args(train_parser)
         except:
             logging.error(f"could not setup training cli")
 
-        eval_parser = subparsers.add_parser("collect", description="Sample data for MuZero Training")
+        collect_parser = subparsers.add_parser("collect", description="Sample data for MuZero Training")
+        collect_parser.add_argument("--machine", help="Machine name for data collection", default="")
         try:
             from jass_mu_zero.scripts.collect_n_send_game_data import MuZeroDataCollectionCLI
-            MuZeroDataCollectionCLI.setup_args(eval_parser)
+            MuZeroDataCollectionCLI.setup_args(collect_parser)
         except:
             logging.error(f"could not setup data collection cli")
 
@@ -99,8 +100,9 @@ class SchieberJassMuZeroCli(Callable):
             MuZeroDataCollectionCLI().run(self.args)
             return
         elif self.args.command == "collect" and not self.args.nodocker:
-            file = Path(__file__).parent.parent.parent / 'resources' / 'datacollectors' / (self.args.machine + '.yml')
-            command = f"docker-compose -f {file} up -d"
+            print("machine", self.args.machine )
+            file = Path(__file__).parent.parent / 'resources' / 'data_collectors' / (self.args.machine + '.yml')
+            command = f"docker-compose -f {file} up" + ("" if attach else " -d ")
 
         if self.args.baselines and command is None:
             logging.info("Creating jass_net docker network")
