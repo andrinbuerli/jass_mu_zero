@@ -46,7 +46,7 @@ Once the replay buffer has been filled, the optimization procedure will start an
 be logged to wandb.ai at the configured location.
 
 
-#Evaluate
+# Evaluate
 To evaluate run
 ```bash
 $ sjmz eval --files experiment-1/dmcts.json
