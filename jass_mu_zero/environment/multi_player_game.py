@@ -11,7 +11,7 @@ from jass_mu_zero.agent.agent_full_action_space import AgentFullActionSpace
 
 class MultiPlayerGame:
     """
-    Wrapper around a rllib implementation of a finite sequential multiplayer game
+    Wrapper around a gym implementation of a finite sequential multiplayer game.
     """
 
     def __init__(self, env: gym):
