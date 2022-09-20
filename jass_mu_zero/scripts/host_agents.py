@@ -39,7 +39,7 @@ class HostAgentsCLI:
     @staticmethod
     def run(args):
         processes = []
-        base_path = Path(__file__).resolve().parent.parent / "resources" / "baselines"
+        base_path = Path(__file__).resolve().parent.parent.parent / "resources" / "baselines"
 
         for agent_str in args.files:
             config = WorkerConfig()

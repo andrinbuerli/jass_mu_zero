@@ -4,8 +4,11 @@ services:
         build:
           context: .
           network: "host"
+        network_mode: "host"
         volumes:
             - .:/app
+        environment:
+          - PYTHONPATH=/app:/app/extern/jass_gym
         deploy:
           resources:
             reservations:
@@ -13,10 +16,4 @@ services:
                 - driver: nvidia
                   device_ids: ['0']
                   capabilities: [gpu]
-        networks:
-          - net
-networks:
-  net:
-    external: true
-    name: jass_net
 

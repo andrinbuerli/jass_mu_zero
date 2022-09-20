@@ -31,7 +31,7 @@ def _single_self_play_game_(i, agent: AgentFullActionSpace):
     game = MultiPlayerGame(env=SchieberJassSingleAgentEnv(observation_builder=IdentityObservationBuilder()))
     observations, rewards, actions, action_probs, action_values = game.play_rounds(get_agent=lambda key: agent)
 
-    observations = [state_features(x) for x in observations]
+    observations = [state_features(x).reshape(-1) for x in observations]
 
     if len(observations) == 37:  # pad if no push
         observations = np.concatenate((observations, np.zeros_like(observations[-1])[None]), axis=0)

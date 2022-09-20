@@ -3,6 +3,6 @@
 export WANDBKEY=$(cat .wandbkey)
 export SKIP_EXTERN=1
 
-export PYTHONPATH=/app
+export PYTHONPATH="${PYTHONPATH}:/app"
 
 exec "$@"

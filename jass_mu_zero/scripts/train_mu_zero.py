@@ -92,7 +92,7 @@ class MuZeroTrainingCLI:
                 mdp_value=worker_config.agent.mdp_value,
                 gamma=worker_config.agent.discount,
                 start_sampling=False,
-                trajectory_data_folder=data_path / "episodes_data",
+                trajectory_data_folder=data_path / "trajectory_data",
                 max_samples_per_episode=worker_config.optimization.max_samples_per_episode,
                 min_non_zero_prob_samples=worker_config.optimization.min_non_zero_prob_samples,
                 use_per=worker_config.optimization.use_per,
@@ -158,7 +158,7 @@ class MuZeroTrainingCLI:
         manager = MetricsManager(*metrics)
 
         if args.log:
-            with open("../.wandbkey", "r") as f:
+            with open("/app/.wandbkey", "r") as f:
                 api_key = f.read().rstrip()
             logger = WandbLogger(
                 wandb_project_name=worker_config.log.projectname,

@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.7.0
+FROM tensorflow/tensorflow:2.7.0-gpu
 
 WORKDIR /tmp
 
