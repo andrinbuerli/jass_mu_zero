@@ -31,7 +31,7 @@ If this would not be the case, the IP in the files must be adapted.
 To start the training process first run 
 
 ```bash
-$ sjmz --attach train --file resources/experiments/experiment-1 
+$ sjmz --attach train --file experiments/experiment-1.json
 ```
 
 and wait until the flask server started hosting. Then start the data collectors on the respective machines
@@ -49,7 +49,5 @@ be logged to wandb.ai at the configured location.
 #Evaluate
 To evaluate run
 ```bash
-$ sjmz eval --files $(find -printf "%P " resources/evaluation/experiment-1/*)
+$ sjmz eval --files experiment-1/dmcts.json
 ```
-which will take quite a long time.
-The evaluation script also offers the option to run only specific evaluations among other arguments.
