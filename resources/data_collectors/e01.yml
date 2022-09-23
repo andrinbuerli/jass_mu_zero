@@ -7,7 +7,7 @@ services:
         network_mode: host
         command: >
             bash -c "sjmz --nodocker --collect
-            --host http://10.180.39.13
+            --host http://10.176.129.55
             --max_parallel_processes 50
             --max_parallel_threads 2
             --min_states_to_send 1"
