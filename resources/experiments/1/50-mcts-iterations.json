@@ -9,7 +9,7 @@
   "c_2": 19652,
   "dirichlet_alpha": 0.3,
   "dirichlet_eps": 0.25,
-  "iterations": 100,
+  "iterations": 50,
   "mdp_value": true,
   "player_func": false,
   "terminal_func": false,
