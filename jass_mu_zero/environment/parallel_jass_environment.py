@@ -73,7 +73,7 @@ def play_games(n_games, network, pool, worker_config):
     probs = [x[3] for x in results]
     values = [x[4] for x in results]
 
-    del agents
+    del agents, results
 
     return actions, values, probs, rewards, states
 
@@ -176,7 +176,6 @@ def _play_games_multi_threaded_(n_games, continuous):
 
                 del states, actions, rewards, probs, values
                 gc.collect()
-
 
         except Exception as e:
             logging.warning(f"Exception occurred: {e}, continuing anyway, traceback: {traceback.format_exc()}")
