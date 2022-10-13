@@ -1,5 +1,5 @@
 {
- "timestamp": 3664621773,
+ "timestamp": 4664621773,
  "log": {
   "projectname": "jass-mu-zero-train",
   "entity": "andrinburli",
@@ -23,7 +23,7 @@
  "optimization": {
   "reanalyse_fraction": 0.0,
   "optimizer": "adam",
-  "learning_rate": 0.001,
+  "learning_rate": 0.0001,
   "adam_beta1": 0.9,
   "adam_beta2": 0.999,
   "adam_epsilon": 1e-07,
@@ -56,7 +56,7 @@
   "updates_per_step": 10,
   "max_steps_per_second": 100.0,
   "total_steps": 500000,
-  "weight_decay": 0.0001,
+  "weight_decay": 0.00001,
   "store_buffer": true,
   "log_n_steps_ahead": 15,
   "apa_n_games": 1,
