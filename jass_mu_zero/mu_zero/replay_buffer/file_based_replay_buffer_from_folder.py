@@ -176,12 +176,15 @@ class FileBasedReplayBufferFromFolder:
             logging.info(f"restored replay buffer from {restore_path}")
         else:
             for file in tqdm(list(self.trajectory_data_folder.glob("*")), desc="Restoring replay buffer..."):
-                try:
-                    with open(file, "rb") as f:
-                        observations, actions, rewards, probs, values = pickle.load(f)
-                except:
-                    continue
-                priority = self._get_priority(rewards, values)
+                if self.value_based_per:
+                    try:
+                        with open(file, "rb") as f:
+                            observations, actions, rewards, probs, values = pickle.load(f)
+                    except:
+                        continue
+                    priority = self._get_priority(rewards, values)
+                else:
+                    priority = self.max_samples_per_episode
                 self.sum_tree.add(data=file.name.split(".")[0], p=priority)
             logging.info(f"restored replay buffer ({self.sum_tree.filled_size}) from {self.trajectory_data_folder}")
 
