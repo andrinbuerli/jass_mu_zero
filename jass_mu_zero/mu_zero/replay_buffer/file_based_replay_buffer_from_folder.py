@@ -9,6 +9,7 @@ from threading import Thread
 from time import sleep
 
 import numpy as np
+from tqdm import tqdm
 
 from jass_mu_zero.mu_zero.replay_buffer.sum_tree import SumTree
 
@@ -174,10 +175,10 @@ class FileBasedReplayBufferFromFolder:
                 self.sum_tree = pickle.load(f)
             logging.info(f"restored replay buffer from {restore_path}")
         else:
-            for file in self.trajectory_data_folder.glob("*"):
+            for file in tqdm(self.trajectory_data_folder.glob("*")):
                 try:
                     with open(file, "rb") as f:
-                        states, actions, rewards, probs, values = pickle.load(f)
+                        observations, actions, rewards, probs, values = pickle.load(f)
                 except:
                     continue
                 priority = self._get_priority(rewards, values)
