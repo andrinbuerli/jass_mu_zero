@@ -175,7 +175,7 @@ class FileBasedReplayBufferFromFolder:
                 self.sum_tree = pickle.load(f)
             logging.info(f"restored replay buffer from {restore_path}")
         else:
-            for file in tqdm(list(self.trajectory_data_folder.glob("*"))):
+            for file in tqdm(list(self.trajectory_data_folder.glob("*")), desc="Restoring replay buffer..."):
                 try:
                     with open(file, "rb") as f:
                         observations, actions, rewards, probs, values = pickle.load(f)
