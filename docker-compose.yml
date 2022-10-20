@@ -1,9 +1,7 @@
 version: '3.8'
 services:
     mu_zero:
-        build:
-          context: .
-          network: "host"
+        image: ghcr.io/andrinbuerli/jass_mu_zero_mu_zero:latest
         network_mode: "host"
         volumes:
             - .:/app
