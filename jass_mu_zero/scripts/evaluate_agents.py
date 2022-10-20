@@ -196,7 +196,7 @@ class MuZeroEvaluationCLI:
         parser.add_argument(f'--parallel_processes_per_evaluation', default=1, type=int, help="Number of max parallel processes per evaluation")
         parser.add_argument(f'--parallel_threads_per_evaluation_process', default=1, type=int, help="Number of max parallel threads per process per evaluation")
         parser.add_argument(f'--no_skip_on_result_file', default=False, action="store_true", help="Skip evaluation if there exists a corresponding result file")
-        parser.add_argument(f'--files', nargs="+", default=["mu_zero/experiment-0/dmcts.json"], help="Filenames of evaluations to be executed (relative to folder resources/evaluation)")
+        parser.add_argument(f'--files', nargs="+", default=[None], help="Filenames of evaluations to be executed (relative to folder resources/evaluation)")
         parser.add_argument(f'--all', default=False, action="store_true", help="run all evaluations from resources/evaluation")
         parser.add_argument(f'--folder', default="results", help="Folder to store evaluation results (relative to this script file)")
 
