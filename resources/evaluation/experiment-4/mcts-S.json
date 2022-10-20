@@ -13,6 +13,13 @@
       "terminal_func": true
     },
     {
+      "type": "policy",
+      "note": "Policy",
+      "skip": true,
+      "experiment_path": "resources/results/4664621773",
+      "greedy": true
+    },
+    {
       "type": "mu-zero-mcts",
       "note": "MCTS-100",
       "iterations": 100,
@@ -21,13 +28,6 @@
       "greedy": true,
       "player_func": true,
       "terminal_func": true
-    },
-    {
-      "type": "policy",
-      "note": "Policy",
-      "skip": true,
-      "experiment_path": "resources/results/4664621773",
-      "greedy": true
     }
   ]
 }
