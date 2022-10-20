@@ -32,5 +32,5 @@ class AgentPolicy(AgentFullActionSpace):
         else:
             policy = policy.numpy().reshape(-1) * self.rule.get_full_valid_actions_from_state(obs)
 
-        values = np.ones_like(policy)  # using only the local policy does not calculate a value
+        values = np.ones((policy.shape[0], 2))  # using only the local policy does not calculate a value
         return policy, values
