@@ -1,10 +1,12 @@
 version: '3.8'
 services:
     data_collector0:
-        build: ../../
+        image: ghcr.io/andrinbuerli/jass_mu_zero_mu_zero:latest
         volumes:
             - ../../:/app
         network_mode: host
+        environment:
+            - PYTHONPATH=/app:/app/extern/jass_gym
         command: >
             bash -c "sjmz --nodocker --collect
             --host http://10.180.39.13
@@ -20,10 +22,12 @@ services:
 
 
     data_collector1:
-        build: ../../
+        image: ghcr.io/andrinbuerli/jass_mu_zero_mu_zero:latest
         volumes:
             - ../../:/app
         network_mode: host
+        environment:
+            - PYTHONPATH=/app:/app/extern/jass_gym
         command: >
             bash -c "sjmz --nodocker --collect
             --host http://10.180.39.13

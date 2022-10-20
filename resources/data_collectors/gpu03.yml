@@ -1,9 +1,10 @@
 version: '2.3'
 services:
     data_collector0:
-        build: ../../
+        image: ghcr.io/andrinbuerli/jass_mu_zero_mu_zero:latest
         environment:
             - NVIDIA_VISIBLE_DEVICES=0
+            - PYTHONPATH=/app:/app/extern/jass_gym
         volumes:
             - ../../:/app
         network_mode: host
@@ -17,9 +18,10 @@ services:
 
 
     data_collector1:
-        build: ../../
+        image: ghcr.io/andrinbuerli/jass_mu_zero_mu_zero:latest
         environment:
             - NVIDIA_VISIBLE_DEVICES=1
+            - PYTHONPATH=/app:/app/extern/jass_gym
         volumes:
             - ../../:/app
             - ../jass-train-py/data/conv_observation_full_0.75_quantile:/data

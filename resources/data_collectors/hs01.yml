@@ -1,6 +1,7 @@
 version: '2.3'
 services:
     data_collector0:
+        #image: ghcr.io/andrinbuerli/jass_mu_zero_mu_zero:latest
         build:
             context: ../../
             network: "host"
@@ -10,8 +11,8 @@ services:
         environment:
           - PYTHONPATH=/app:/app/extern/jass_gym
         command: >
-            bash -c "sjmz --nodocker collect
-            --host http://localhost
+            bash -c "pip install numpy==1.23.2 && python -m memory_profiler /app/jass_mu_zero/__main__.py --nodocker collect
+            --host http://10.176.129.55
             --max_parallel_processes 10
             --max_parallel_threads 2
             --continuous_games_without_reload 4

@@ -1,0 +1,30 @@
+{
+  "n_games": 1000,
+  "information": "imperfect",
+  "agents": [
+    {
+      "type": "policy",
+      "note": "Policy-S",
+      "skip": false,
+      "experiment_path": "resources/results/1653237674",
+      "greedy": true
+    },
+    {
+      "type": "policy",
+      "note": "Policy",
+      "skip": true,
+      "experiment_path": "resources/results/4664621773",
+      "greedy": true
+    },
+    {
+      "type": "mu-zero-mcts",
+      "note": "MCTS-100",
+      "iterations": 100,
+      "skip": true,
+      "experiment_path": "resources/results/4664621773",
+      "greedy": true,
+      "player_func": true,
+      "terminal_func": true
+    }
+  ]
+}
