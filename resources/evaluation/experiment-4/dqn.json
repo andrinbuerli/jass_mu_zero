@@ -1,0 +1,18 @@
+{
+  "n_games": 10000,
+  "information": "imperfect",
+  "agents": [
+    {
+      "type": "dqn",
+      "note": "DQN",
+      "skip": false
+    },
+    {
+      "type": "policy",
+      "note": "Policy",
+      "skip": true,
+      "experiment_path": "resources/results/4664621773",
+      "greedy": true
+    }
+  ]
+}
