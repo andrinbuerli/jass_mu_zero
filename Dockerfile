@@ -1,12 +1,13 @@
-FROM tensorflow/tensorflow:2.7.0-gpu
+FROM tensorflow/tensorflow:2.10.0-gpu
 
 WORKDIR /tmp
 
+# Fix Nvidia repository GPG error, see https://github.com/NVIDIA/nvidia-docker/issues/1632
+# see also https://github.com/open-mmlab/mmfashion/issues/147
 RUN apt-get install wget -y
-
 RUN apt-key del 7fa2af80
-
 RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
+RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub
 
 RUN apt-get update && apt-get install build-essential wget git -y
 
@@ -25,8 +26,8 @@ RUN git clone https://gitlab.com/libeigen/eigen.git && cd eigen && git checkout 
 RUN cmake eigen && make install
 RUN ln -s /usr/local/include/eigen3/Eigen /usr/local/include/Eigen
 
-RUN wget https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-gpu-linux-x86_64-2.6.0.tar.gz
-RUN tar -C /usr/local -xzf libtensorflow-gpu-linux-x86_64-2.6.0.tar.gz
+RUN wget https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-gpu-linux-x86_64-2.10.0.tar.gz
+RUN tar -C /usr/local -xzf libtensorflow-gpu-linux-x86_64-2.10.0.tar.gz
 RUN rm libtensorflow-gpu*
 
 RUN chown -hR 1000 /usr
@@ -45,7 +46,7 @@ RUN git config --global --add safe.directory /app
 RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools
 
-RUN pip install -v --no-cache -e .
+RUN pip install --force-reinstall -v --no-cache -e .
 
 RUN pip install -r requirements-dev.txt
 
